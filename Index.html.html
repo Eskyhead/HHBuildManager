@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hampton Homes — Build Manager v5</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#fff;--bg1:#f7f7f4;--bg2:#f0f0eb;--bg3:#e8e8e2;
+  --t0:#1a1a18;--t1:#555550;--t2:#8a8a84;
+  --b1:rgba(0,0,0,0.09);--b2:rgba(0,0,0,0.18);
+  --r6:6px;--r8:8px;--r12:12px;
+  --grn:#3b6d11;--grn-bg:#eaf3de;
+  --blu:#185fa5;--blu-bg:#e6f1fb;
+  --amb:#854f0b;--amb-bg:#faeeda;
+  --red:#a32d2d;--red-bg:#fcebeb;
+  --gry:#5f5e5a;--gry-bg:#f1efe8;
+  --tel:#0f6e56;--tel-bg:#e1f5ee;
+  --pur:#3c3489;--pur-bg:#eeedfe;
+  --shadow:0 1px 4px rgba(0,0,0,0.08),0 0 0 0.5px rgba(0,0,0,0.07);
+}
+body{font:13px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg2);color:var(--t0)}
+.app{display:flex;flex-direction:column;min-height:100vh}
+
+/* Header */
+.hdr{background:var(--bg0);border-bottom:1px solid var(--b1);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:300;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.hdr h1{font-size:14px;font-weight:600}.hdr p{font-size:11px;color:var(--t1);margin-top:1px}
+.hpills{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.hpill{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg2);color:var(--t1)}
+.hpill.hi{background:var(--blu-bg);color:var(--blu);font-weight:500}
+.hpill.warn{background:var(--amb-bg);color:var(--amb)}
+.hdr-actions{display:flex;gap:5px;align-items:center}
+.save-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);display:inline-block;margin-right:3px;opacity:0;transition:opacity .4s}
+.save-dot.show{opacity:1}
+
+/* Tabs */
+.tab-nav{background:var(--bg0);border-bottom:1px solid var(--b1);display:flex;overflow-x:auto;padding:0 10px;scrollbar-width:none;gap:1px;position:sticky;top:48px;z-index:200}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{border:none;background:none;cursor:pointer;padding:8px 13px;font-size:12px;color:var(--t1);border-bottom:2.5px solid transparent;white-space:nowrap;position:relative}
+.tab-btn:hover{color:var(--t0)}.tab-btn.active{color:var(--blu);border-bottom-color:var(--blu);font-weight:600}
+.tab-badge{display:inline-block;background:var(--red);color:#fff;border-radius:10px;font-size:9px;padding:0 4px;min-width:14px;text-align:center;margin-left:4px;vertical-align:middle;line-height:14px}
+.tc{padding:14px 18px;max-width:1500px;margin:0 auto;width:100%}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--t0);color:#fff;padding:8px 16px;border-radius:var(--r8);font-size:12px;z-index:9999;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* Cards */
+.card{background:var(--bg0);border:0.5px solid var(--b1);border-radius:var(--r12);padding:13px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;white-space:nowrap}
+.bc{background:var(--grn-bg);color:var(--grn)}.ba{background:var(--blu-bg);color:var(--blu)}
+.bns{background:var(--gry-bg);color:var(--gry)}.bh{background:var(--amb-bg);color:var(--amb)}
+.bd{background:var(--red-bg);color:var(--red)}.bt{background:var(--tel-bg);color:var(--tel)}
+.bp{background:var(--pur-bg);color:var(--pur)}
+.notice{background:var(--amb-bg);color:var(--amb);padding:8px 12px;border-radius:var(--r8);font-size:11px;margin-bottom:10px;border:0.5px solid rgba(133,79,11,0.2)}
+.notice-info{background:var(--blu-bg);color:var(--blu);padding:8px 12px;border-radius:var(--r8);font-size:11px;margin-bottom:10px}
+.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px}
+.sec-title{font-size:15px;font-weight:600}.sec-note{font-size:11px;color:var(--t2);margin-top:2px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.metric{background:var(--bg0);border:0.5px solid var(--b1);border-radius:var(--r8);padding:11px 13px;box-shadow:var(--shadow)}
+.metric-label{font-size:10px;color:var(--t2);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.metric-val{font-size:20px;font-weight:600;letter-spacing:-.5px}.metric-sub{font-size:11px;color:var(--t1);margin-top:1px}
+.tbl-wrap{overflow-x:auto;border-radius:var(--r12);border:0.5px solid var(--b1);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;border-bottom:1px solid var(--b2);font-weight:600;font-size:11px;color:var(--t1);background:var(--bg1);white-space:nowrap}
+td{padding:6px 10px;border-bottom:0.5px solid var(--b1);vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg1)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.total-row td{font-weight:600;background:var(--bg1)}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border:0.5px solid var(--b2);border-radius:var(--r8);background:none;cursor:pointer;font-size:12px;color:var(--t0);transition:background .12s}
+.btn:hover{background:var(--bg2)}.btn-sm{padding:4px 9px;font-size:11px;border-radius:var(--r6)}
+.btn-xs{padding:2px 7px;font-size:10px;border-radius:5px}
+.btn-p{background:var(--t0);color:var(--bg0);border-color:transparent}.btn-p:hover{opacity:.85}
+.btn-d{color:var(--red);border-color:var(--red-bg)}.btn-d:hover{background:var(--red-bg)}
+.btn-grn{background:var(--grn);color:#fff;border-color:transparent}.btn-grn:hover{opacity:.85}
+.fg{display:flex;flex-direction:column;gap:3px;margin-bottom:7px}
+.fg label{font-size:11px;color:var(--t1);font-weight:500}
+.fg input,.fg select,.fg textarea{padding:6px 9px;border:0.5px solid var(--b2);border-radius:var(--r8);font-size:12px;background:var(--bg0);color:var(--t0);transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blu);box-shadow:0 0 0 2px rgba(24,95,165,0.12)}
+.fr{display:grid;gap:8px;margin-bottom:4px}.fr2{grid-template-columns:1fr 1fr}.fr3{grid-template-columns:1fr 1fr 1fr}
+.f-actions{display:flex;gap:6px;margin-top:8px}
+.bbar-wrap{margin:6px 0 12px}.bbar{height:10px;background:var(--bg2);border-radius:5px;overflow:hidden;display:flex}
+.bbar-a{background:var(--blu);height:100%;transition:width .3s}.bbar-r{background:var(--blu-bg);height:100%}
+.bbar-legend{display:flex;gap:12px;font-size:11px;color:var(--t1);margin-top:4px;flex-wrap:wrap}
+.leg-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;vertical-align:middle}
+
+/* Stage progress */
+.stage-strip{display:flex;align-items:center;gap:0;margin-bottom:14px}
+.stage-step{display:flex;align-items:center;font-size:11px;color:var(--t2)}
+.stage-node{padding:4px 10px;border-radius:20px;background:var(--bg2);font-size:11px;font-weight:500;white-space:nowrap;border:1px solid var(--b1)}
+.stage-node.done{background:var(--grn-bg);color:var(--grn);border-color:var(--grn-bg)}
+.stage-node.current{background:var(--blu);color:#fff;border-color:var(--blu)}
+.stage-node.future{opacity:.45}
+.stage-arrow{margin:0 4px;color:var(--b2);font-size:10px}
+
+/* Critical tasks */
+.crit-task{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:0.5px solid var(--b1)}
+.crit-task:last-child{border-bottom:none}
+.crit-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.crit-dot.ph{background:#e24b4a}.crit-dot.pm{background:#ef9f27}.crit-dot.pl{background:#639922}
+
+/* GANTT */
+.gantt-wrap{background:var(--bg0);border:0.5px solid var(--b1);border-radius:var(--r12);overflow:hidden;box-shadow:var(--shadow)}
+.gantt-toolbar{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:0.5px solid var(--b1);flex-wrap:wrap;background:var(--bg1)}
+.gantt-legend{display:flex;gap:14px;padding:6px 14px;font-size:11px;color:var(--t1);border-bottom:0.5px solid var(--b1);flex-wrap:wrap}
+.g-leg{display:flex;align-items:center;gap:5px}
+.g-swatch{width:14px;height:10px;border-radius:3px;display:inline-block}
+.g-scroll{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 240px);-webkit-overflow-scrolling:touch}
+.g-tbl{border-collapse:collapse;font-size:11px;user-select:none}
+.g-tbl th,.g-tbl td{border:0.5px solid var(--b1)}
+.g-sticky{position:sticky;left:0;z-index:10;min-width:230px;max-width:230px;background:var(--bg0);border-right:1.5px solid var(--b2)!important}
+.g-yr-hdr{background:var(--bg2)!important;text-align:center;font-weight:600;font-size:11px;padding:3px 0}
+.g-mo-hdr{text-align:center;font-size:10px;padding:2px 1px;background:var(--bg1);white-space:nowrap;overflow:hidden;min-width:24px}
+.g-wk-hdr{text-align:center;font-size:9px;padding:2px 0;background:var(--bg0);min-width:24px;max-width:24px}
+.g-wk-hdr.g-today-hdr{background:var(--red-bg)!important;color:var(--red)!important;font-weight:700}
+.g-past-hdr{background:var(--bg3)!important;text-align:center;font-size:9px;writing-mode:vertical-rl;padding:4px 2px;min-width:20px;max-width:20px;color:var(--t2)}
+.g-cc-row td{background:var(--bg2)!important;cursor:pointer}
+.g-cc-row td:hover{background:var(--bg3)!important}
+.g-cc-lbl{display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:11px;font-weight:600}
+.g-row-lbl{padding:3px 8px}
+.g-row-code{font-size:10px;color:var(--t2)}
+.g-row-name{font-size:11px;font-weight:500}
+.g-row-who{font-size:10px;color:var(--t1)}
+.g-row-actions{display:inline-flex;gap:3px;margin-left:4px;opacity:0}
+tr:hover .g-row-actions{opacity:1}
+.g-cell{min-width:24px;max-width:24px;height:22px;cursor:crosshair;padding:0}
+.g-cell.g-painted{background:#2e7dd1}
+.g-cell:hover:not(.g-painted){background:rgba(46,125,209,0.22)}
+.g-cell.g-painted:hover{background:#1f5fa0}
+.g-cell.g-today-col{border-left:2px solid var(--red)!important}
+.g-past-cell{min-width:20px;max-width:20px;background:var(--bg3);text-align:center;font-size:9px;color:var(--t2);cursor:default}
+.g-add-row-inp{padding:3px 7px;border:0.5px solid var(--b2);border-radius:5px;font-size:11px;background:var(--bg0);color:var(--t0)}
+.g-add-row-inp:focus{outline:none;border-color:var(--blu)}
+
+/* SUPERVISOR TASKS */
+.sup-outer{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.sup-section{background:var(--bg0);border:0.5px solid var(--b1);border-radius:var(--r12);overflow:hidden;box-shadow:var(--shadow)}
+.sup-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg1);border-bottom:0.5px solid var(--b1)}
+.sup-section-title{font-size:13px;font-weight:600}
+.sup-board{border-bottom:0.5px solid var(--b1)}
+.sup-board:last-child{border-bottom:none}
+.sup-board-hdr{display:flex;align-items:center;padding:9px 13px;cursor:pointer;gap:7px;user-select:none}
+.sup-board-hdr:hover{background:var(--bg1)}
+.sup-board-name{font-size:12px;font-weight:500;flex:1;cursor:text}
+.sup-board-name:focus{outline:none;border-bottom:1.5px solid var(--blu)}
+.sup-board-meta{font-size:10px;color:var(--t2)}
+.sup-board-chev{font-size:10px;color:var(--t2);transition:transform .15s;flex-shrink:0}
+.sup-board-chev.open{transform:rotate(180deg)}
+.sup-board-body{display:none;padding:0 0 6px}
+.sup-board-body.open{display:block}
+.sup-sub{border-top:0.5px solid var(--b1);margin-top:2px}
+.sup-sub-hdr{display:flex;align-items:center;gap:6px;padding:6px 13px;background:var(--bg1);cursor:pointer;font-size:11px;font-weight:500}
+.sup-sub-hdr:hover{background:var(--bg2)}
+.sup-sub-hdr.inactive{opacity:.45}
+.sup-sub-body{padding:0 10px 4px 26px;display:none}
+.sup-sub-body.open{display:block}
+.sup-sub-toggle{font-size:9px;cursor:pointer;width:14px;height:14px;border-radius:3px;border:1px solid var(--b2);background:none;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.sup-sub-toggle.on{background:var(--grn);border-color:var(--grn);color:#fff}
+.sup-sub-chev{font-size:9px;color:var(--t2);transition:transform .15s;margin-left:auto}
+.sup-sub-chev.open{transform:rotate(90deg)}
+
+/* Task cards */
+.task-card{background:var(--bg0);border:0.5px solid var(--b1);border-radius:var(--r8);margin:4px 0;overflow:hidden}
+.task-card.defect-card{border-color:var(--red);background:#fff8f8}
+.task-card-main{display:flex;align-items:flex-start;gap:6px;padding:7px 8px;cursor:pointer}
+.task-card-main:hover{background:var(--bg1)}
+.task-card.defect-card .task-card-main:hover{background:#fff0f0}
+.task-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b2);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;margin-top:1px}
+.task-chk.done{background:var(--grn);border-color:var(--grn);color:#fff}
+.task-card-text{font-size:12px;flex:1;line-height:1.4}
+.task-card.done-card .task-card-text{text-decoration:line-through;color:var(--t2)}
+.task-pri{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.task-pri.ph{background:#e24b4a}.task-pri.pm{background:#ef9f27}.task-pri.pl{background:#639922}
+.task-due-tag{font-size:10px;color:var(--t2);white-space:nowrap}
+.task-due-tag.overdue{color:var(--red);font-weight:500}
+.task-del{font-size:11px;color:var(--t2);cursor:pointer;border:none;background:none;padding:1px 3px;flex-shrink:0}
+.task-del:hover{color:var(--red)}
+.task-detail{display:none;padding:6px 8px 8px 30px;border-top:0.5px solid var(--b1);background:var(--bg1);font-size:11px}
+.task-detail.open{display:block}
+.task-detail-row{margin-bottom:4px;color:var(--t1)}
+.task-add-form{padding:6px 10px;background:var(--blu-bg);border-top:0.5px solid var(--b1)}
+.task-add-row{display:flex;gap:5px;margin-bottom:5px;flex-wrap:wrap}
+.task-add-inp{padding:4px 7px;border:0.5px solid var(--b2);border-radius:5px;font-size:11px;background:var(--bg0);color:var(--t0)}
+.task-add-inp:focus{outline:none;border-color:var(--blu)}
+.task-add-inp.wide{flex:1;min-width:120px}
+.task-add-inp.narrow{width:80px}
+.done-section{margin-top:4px;border-top:0.5px solid var(--b1)}
+.done-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:5px 13px;cursor:pointer;font-size:11px;color:var(--t2);user-select:none}
+.done-section-hdr:hover{color:var(--t1)}
+.done-section-body{display:none;padding:0 10px 4px}
+.done-section-body.open{display:block}
+.defects-section{padding:4px 10px;border-bottom:0.5px solid var(--red-bg)}
+.defects-section-title{font-size:10px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;padding:4px 3px 0}
+
+/* BOQ */
+.acc-wrap{margin-bottom:6px;border:0.5px solid var(--b1);border-radius:var(--r12);overflow:hidden;box-shadow:var(--shadow)}
+.acc-head{display:flex;align-items:center;padding:9px 13px;background:var(--bg0);cursor:pointer;gap:7px;user-select:none;flex-wrap:wrap}
+.acc-head:hover{background:var(--bg1)}
+.acc-num{font-size:10px;font-weight:600;background:var(--bg2);color:var(--t1);padding:2px 7px;border-radius:20px;min-width:26px;text-align:center}
+.acc-title{font-size:13px;font-weight:500;flex:1;min-width:120px}
+.acc-budget-strip{display:flex;gap:14px;align-items:center;font-size:11px;flex-wrap:wrap}
+.acc-bval{font-variant-numeric:tabular-nums;font-size:11px}
+.acc-bval b{font-size:12px}
+.acc-chev{font-size:10px;color:var(--t2);transition:transform .15s;flex-shrink:0}
+.acc-chev.open{transform:rotate(180deg)}
+.acc-body{border-top:0.5px solid var(--b1);display:none}
+.acc-body.open{display:block}
+.acc-footer{padding:7px 13px;border-top:0.5px solid var(--b1);background:var(--bg1);display:flex;gap:6px;align-items:center}
+.rate-inp{width:90px;padding:3px 6px;border:0.5px solid var(--b2);border-radius:5px;font-size:12px;background:var(--bg0);color:var(--t0);text-align:right}
+.rate-inp:focus{outline:none;border-color:var(--blu)}
+.qty-inp{width:58px;padding:3px 6px;border:0.5px solid var(--b2);border-radius:5px;font-size:12px;background:var(--bg0);color:var(--t0);text-align:right}
+.note-inp{width:100%;padding:3px 6px;border:0.5px solid var(--b2);border-radius:5px;font-size:12px;background:var(--bg0);color:var(--t0)}
+.cc-sel{font-size:11px;padding:2px 5px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg0)}
+.acc-wrap.deac{opacity:.45}
+
+/* Variations */
+.var-status-pending{color:var(--amb);font-weight:500}
+.var-status-approved{color:var(--grn);font-weight:500}
+.var-status-rejected{color:var(--red);font-weight:500}
+.var-status-on_hold{color:var(--gry);font-weight:500}
+
+/* Directory */
+.dir-cc-group{margin-bottom:6px;border:0.5px solid var(--b1);border-radius:var(--r12);overflow:hidden;box-shadow:var(--shadow)}
+.dir-cc-hdr{display:flex;align-items:center;padding:9px 13px;background:var(--bg0);cursor:pointer;gap:8px}
+.dir-cc-hdr:hover{background:var(--bg1)}
+.dir-body{display:none;padding:8px 13px;border-top:0.5px solid var(--b1)}
+.dir-body.open{display:block}
+.dir-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--b1);flex-wrap:wrap}
+.dir-row:last-child{border-bottom:none}
+.dir-sel{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--b2);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.dir-sel.on{background:var(--grn);border-color:var(--grn);color:#fff}
+
+/* Print */
+@media print{
+  .hdr,.tab-nav,.btn,.btn-sm,.btn-xs,.btn-p,.f-actions,.g-row-actions,.task-del,.task-add-form,.acc-footer,.hdr-actions{display:none!important}
+  .tc{padding:0;max-width:100%}
+  .card,.acc-wrap,.tbl-wrap{box-shadow:none;break-inside:avoid}
+  body{background:#fff;font-size:11px}
+  .tab-btn:not(.active){display:none}
+}
+
+/* Responsive */
+@media(max-width:900px){.sup-outer{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .fr2,.fr3{grid-template-columns:1fr}
+  .tc{padding:10px 12px}
+  .hpills{display:none}
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  .stage-strip{overflow-x:auto;padding-bottom:4px}
+  .acc-budget-strip{gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hdr">
+  <div>
+    <h1>Hampton Homes — Build Manager</h1>
+    <p>44 Billiau Rd, Guanaba QLD 4210 &nbsp;·&nbsp; Alan &amp; Julie Frost &nbsp;·&nbsp; Job: 2344BIL-Main &nbsp;·&nbsp; Cost Plus $10M</p>
+  </div>
+  <div class="hpills">
+    <span class="hpill hi">Stage 4 — Lock-up</span>
+    <span class="hpill">Invested: $4.07M</span>
+    <span class="hpill">Rem (est.): $4.30M</span>
+    <span class="hpill">Est. Complete: Dec 2026</span>
+  </div>
+  <div class="hdr-actions">
+    <span class="save-dot" id="save-dot" title="Saved"></span>
+    <button class="btn btn-sm" onclick="resetData()" title="Clear all saved data and reset to defaults" style="color:var(--t2)">Reset</button>
+    <button class="btn btn-sm" onclick="window.print()">Print</button>
+  </div>
+</header>
+<nav class="tab-nav" id="tab-nav"></nav>
+<div class="toast" id="toast"></div>
+<main id="tab-content" class="tc"></main>
+</div>
+<script>
+// ═══ CC DATA ═══════════════════════════════════════════════════════
+const CC_DATA=[
+{id:1,code:'01',name:'Preliminaries',desc:'Professionals, Approvals, Insurance, Hire, Scaffold',stages:[1,2,3,4,5,6],budget:286000,spent:200000,
+items:[
+{code:'01.10',name:'Professionals / Consultants',unit:'LS',qty:1,rate:15000,status:'complete'},
+{code:'01.11',name:'Surveying',unit:'LS',qty:1,rate:9000,status:'complete'},
+{code:'01.12',name:'Interior Design',unit:'LS',qty:1,rate:28000,status:'complete'},
+{code:'01.13',name:'Architecture',unit:'LS',qty:1,rate:35000,status:'complete'},
+{code:'01.16',name:'Engineering — Structural',unit:'LS',qty:1,rate:32000,status:'active'},
+{code:'01.20',name:'Approvals — BA, Certifier, Council',unit:'LS',qty:1,rate:17000,status:'complete'},
+{code:'01.30',name:'Insurance — QBCC, GC All Risk',unit:'LS',qty:1,rate:28000,status:'complete'},
+{code:'01.40',name:'Site Costs',unit:'LS',qty:1,rate:12000,status:'active'},
+{code:'01.50',name:'OHS / Safety',unit:'LS',qty:1,rate:8500,status:'active'},
+{code:'01.60',name:'Hire — Tools, WC, Temp Fence',unit:'Wks',qty:52,rate:300,status:'active'},
+{code:'01.70',name:'Crane Hire',unit:'Hrs',qty:50,rate:310,status:'active'},
+{code:'01.80',name:'Scaffolding',unit:'LS',qty:1,rate:128000,status:'active'},
+{code:'01.90',name:'Skip Bins (15m³)',unit:'Each',qty:12,rate:1720,status:'active'},
+{code:'01.95',name:'Builders Clean',unit:'m²',qty:650,rate:13,status:'not_started'},
+]},
+{id:2,code:'02',name:'Earth Works',desc:'Demolition, Excavation, Plant Hire, Fill',stages:[1,2],budget:120000,spent:120000,
+items:[
+{code:'02.10',name:'Demolition',unit:'LS',qty:1,rate:0,status:'complete'},
+{code:'02.30',name:'Screw Piers & Piles',unit:'LS',qty:1,rate:15000,status:'complete'},
+{code:'02.40',name:'Site Cut & Earthworks',unit:'LS',qty:1,rate:80000,status:'complete'},
+{code:'02.41',name:'Plant Hire — Excavator',unit:'Hrs',qty:0,rate:195,status:'complete'},
+{code:'02.50',name:'Fill Materials — Crusher Dust',unit:'m³',qty:0,rate:58,status:'complete'},
+{code:'02.60',name:'Tip Fees',unit:'m³',qty:0,rate:48,status:'complete'},
+{code:'02.70',name:'Traffic Control',unit:'LS',qty:1,rate:0,status:'complete'},
+]},
+{id:3,code:'03',name:'Concrete / Pest',desc:'Concrete Supply & Labour, Pump, Formwork, Termite',stages:[2,3],budget:160000,spent:160000,
+items:[
+{code:'03.10',name:'Concrete Materials',unit:'m³',qty:0,rate:220,status:'complete'},
+{code:'03.20',name:'Concrete Labour',unit:'m²',qty:0,rate:78,status:'complete'},
+{code:'03.30',name:'Concrete Pump',unit:'Hrs',qty:0,rate:495,status:'complete'},
+{code:'03.40',name:'Formwork — Suspended Decks',unit:'LS',qty:1,rate:20000,status:'complete'},
+{code:'03.50',name:'Concrete Cutting',unit:'Hrs',qty:0,rate:260,status:'active'},
+{code:'03.60',name:'Termite Treatment',unit:'LS',qty:1,rate:30000,status:'active'},
+{code:'03.01',name:'Post Tension System',unit:'LS',qty:1,rate:30250,status:'complete'},
+]},
+{id:4,code:'04',name:'Steel',desc:'Reo Supply, Steel Fixer, Structural, Sheet Metal',stages:[2,3,4],budget:335000,spent:300000,
+items:[
+{code:'04.10',name:'Reo Supply — Bar & Mesh',unit:'Tonne',qty:0,rate:2172,status:'complete'},
+{code:'04.20',name:'Steel Fixer — Labour',unit:'Tonne',qty:0,rate:820,status:'complete'},
+{code:'04.21',name:'Post Tension — Labour',unit:'LS',qty:1,rate:30250,status:'complete'},
+{code:'04.30',name:'Structural Steel — Fab & Install',unit:'LS',qty:1,rate:280687,status:'active'},
+{code:'04.40',name:'Sheet Metal',unit:'LS',qty:1,rate:0,status:'complete'},
+]},
+{id:5,code:'05',name:'Bricklayer / Render',desc:'Blockwork Supply & Labour, Render',stages:[3,4],budget:115000,spent:60000,
+items:[
+{code:'05.10',name:'Blocks Supply — Adbri',unit:'Each',qty:0,rate:2.65,status:'complete'},
+{code:'05.20',name:'Bricklayer — Labour',unit:'Each',qty:0,rate:5.50,status:'active'},
+{code:'05.30',name:'Renderer',unit:'m²',qty:0,rate:58,status:'not_started'},
+{code:'05.40',name:'Applied Finishes',unit:'m²',qty:0,rate:48,status:'complete'},
+]},
+{id:6,code:'06',name:'Carpentry',desc:'Frame, Lock-up, Cladding, Soffit, Fixout, Final Fit Off',stages:[3,4,5,6],budget:1200000,spent:480000,
+items:[
+{code:'06.20',name:'Sub Floor — Material',unit:'LS',qty:1,rate:0,status:'complete'},
+{code:'06.31',name:'Frame & Truss — Labour',unit:'LS',qty:1,rate:0,status:'complete'},
+{code:'06.40',name:'Lock Up — Material',unit:'LS',qty:1,rate:0,status:'complete'},
+{code:'06.50',name:'External Cladding — Material',unit:'m²',qty:0,rate:125,status:'active'},
+{code:'06.51',name:'External Cladding — Labour',unit:'m²',qty:0,rate:48,status:'complete'},
+{code:'06.60',name:'Soffit — Material',unit:'m²',qty:0,rate:98,status:'active'},
+{code:'06.61',name:'Soffit — Labour',unit:'m²',qty:0,rate:32,status:'complete'},
+{code:'06.70',name:'Fixout — Material (Lump Sum)',unit:'LS',qty:1,rate:0,status:'not_started'},
+{code:'06.71',name:'Fixout — Labour',unit:'m²',qty:0,rate:42,status:'not_started'},
+{code:'06.80',name:'Final Fit Off — Material (LS)',unit:'LS',qty:1,rate:0,status:'not_started'},
+{code:'06.99',name:'General Carpentry & Labourers',unit:'Hrs',qty:0,rate:115,status:'active'},
+]},
+{id:7,code:'07',name:'Joinery',desc:'Windows, Cabinets, Benchtops, Handrails, Stairs',stages:[4,5],budget:630000,spent:200000,
+items:[
+{code:'07.10',name:'Windows & Doors',unit:'LS',qty:1,rate:200000,status:'active'},
+{code:'07.20',name:'Cabinet Maker',unit:'LS',qty:1,rate:100000,status:'not_started'},
+{code:'07.30',name:'Bench Tops',unit:'LM',qty:0,rate:870,status:'not_started'},
+{code:'07.40',name:'Handrails — Custom Steel/Glass',unit:'LM',qty:0,rate:1250,status:'not_started'},
+{code:'07.50',name:'Stairs — Curved Feature Stair',unit:'LS',qty:1,rate:100000,status:'not_started'},
+{code:'07.60',name:'Splashbacks',unit:'m²',qty:0,rate:260,status:'not_started'},
+]},
+{id:8,code:'08',name:'Roof',desc:'Fascia, Gutters, Roof Sheeting',stages:[4],budget:170000,spent:85000,
+items:[
+{code:'08.10',name:'Fascia & Gutter — Custom Fabricated',unit:'LM',qty:0,rate:125,status:'complete'},
+{code:'08.20',name:'Roofing — Sheets & Install',unit:'m²',qty:0,rate:88,status:'active'},
+]},
+{id:9,code:'09',name:'Gyprock / Plaster',desc:'Insulation, Plasterboard, Suspended Ceilings',stages:[5],budget:135000,spent:0,
+items:[
+{code:'09.10',name:'Insulation — R2 walls, R3.5 ceiling',unit:'m²',qty:0,rate:19,status:'complete'},
+{code:'09.20',name:'Plastering — Supply & Install',unit:'m²',qty:0,rate:58,status:'not_started'},
+]},
+{id:10,code:'10',name:'Electrical',desc:'Electrician, Fittings, Appliances, A/C, Security, Solar',stages:[5,6],budget:215000,spent:30000,
+items:[
+{code:'10.10',name:'Electrician — Labour & Materials',unit:'LS',qty:1,rate:75000,status:'active'},
+{code:'10.20',name:'Light Fittings & Electrical Goods',unit:'LS',qty:1,rate:0,status:'not_started'},
+{code:'10.30',name:'White Goods & Appliances',unit:'LS',qty:1,rate:0,status:'not_started'},
+{code:'10.43',name:'Security System',unit:'LS',qty:1,rate:15000,status:'active'},
+{code:'10.70',name:'Mechanical Ventilation',unit:'LS',qty:1,rate:0,status:'active'},
+{code:'10.80',name:'Air Conditioning',unit:'LS',qty:1,rate:60000,status:'not_started'},
+{code:'10.85',name:'Under Floor Heating',unit:'m²',qty:0,rate:155,status:'not_started'},
+{code:'10.90',name:'Solar System',unit:'kW',qty:0,rate:1550,status:'not_started'},
+]},
+{id:11,code:'11',name:'Plumber / Gas',desc:'Plumbing, Gas, Water Tanks, Tapware',stages:[2,5,6],budget:65000,spent:20000,
+items:[
+{code:'11.10',name:'Plumbing — Labour & Materials',unit:'LS',qty:1,rate:65000,status:'active'},
+{code:'11.30',name:'Tapware, Sinks & Sanitary Ware',unit:'LS',qty:1,rate:0,status:'not_started'},
+{code:'11.40',name:'Gas Plumbing',unit:'LS',qty:1,rate:0,status:'not_started'},
+]},
+{id:12,code:'12',name:'Tiler / Stone / Waterproofing',desc:'Waterproofing, Tile Materials & Labour, Stone Cladding',stages:[5,6],budget:255000,spent:40000,
+items:[
+{code:'12.10',name:'Tile / Stone Materials',unit:'m²',qty:0,rate:125,status:'not_started'},
+{code:'12.20',name:'Tiling Labour',unit:'m²',qty:0,rate:95,status:'not_started'},
+{code:'12.30',name:'Waterproofing',unit:'m²',qty:0,rate:48,status:'active'},
+{code:'12.40',name:'Silicon & Sealing',unit:'LM',qty:0,rate:16,status:'not_started'},
+{code:'12.50',name:'Stone Cladding — External',unit:'m²',qty:0,rate:365,status:'not_started'},
+]},
+{id:13,code:'13',name:'Painting',desc:'Internal & External Painting',stages:[5,6],budget:120000,spent:0,items:[{code:'13.10',name:'Painter — Labour & Materials',unit:'m²',qty:0,rate:19,status:'not_started'}]},
+{id:14,code:'14',name:'Hardware / Garage Door / Gates',desc:'Hardware, Garage Door, Auto Gates, Screens',stages:[5,6],budget:70000,spent:5000,
+items:[
+{code:'14.10',name:'Hardware — Door & Window Hardware',unit:'LS',qty:1,rate:0,status:'complete'},
+{code:'14.20',name:'Garage Door',unit:'Each',qty:1,rate:70000,status:'not_started'},
+{code:'14.30',name:'Gates & Auto Gates',unit:'LS',qty:1,rate:0,status:'complete'},
+{code:'14.40',name:'Aluminium Screens / Louvres',unit:'m²',qty:0,rate:295,status:'complete'},
+]},
+{id:15,code:'15',name:'Shower Screens / Mirrors / Robes',desc:'Frameless Shower Screens, Mirrors, Robe Systems',stages:[5,6],budget:0,spent:0,
+items:[{code:'15.10',name:'Shower Screens & Mirrors — TBC',unit:'LS',qty:1,rate:0,status:'not_started'},{code:'15.20',name:'Robe Fit Out — TBC',unit:'LS',qty:1,rate:0,status:'not_started'}]},
+{id:16,code:'16',name:'Floor Coverings',desc:'Timber Flooring, Carpet, Vinyl',stages:[6],budget:100000,spent:0,
+items:[{code:'16.10',name:'T&G Timber Flooring (Teak) — Supply & Install',unit:'m²',qty:0,rate:185,status:'not_started'},{code:'16.30',name:'Carpet, Vinyl & Other',unit:'m²',qty:0,rate:88,status:'not_started'}]},
+{id:17,code:'17',name:'Landscaping / Pool / Fences',desc:'Landscaping, Pool, Pool Fence, Letterbox',stages:[6],budget:250000,spent:0,
+items:[
+{code:'17.10',name:'Landscaping',unit:'LS',qty:1,rate:150000,status:'not_started'},
+{code:'17.20',name:'Swimming Pool & Spa',unit:'LS',qty:1,rate:100000,status:'not_started'},
+{code:'17.30',name:'Pool Fence',unit:'LM',qty:0,rate:395,status:'not_started'},
+{code:'17.40',name:'Boundary Fences',unit:'LM',qty:0,rate:290,status:'not_started'},
+]},
+{id:18,code:'18',name:'Special Items',desc:'Fireplace, Lift, Glass Floor, Soft Furnishings',stages:[5,6],budget:50000,spent:0,
+items:[
+{code:'18.10',name:'Fireplace — Supply & Install',unit:'LS',qty:1,rate:50000,status:'not_started'},
+{code:'18.20',name:'Soft Furnishings',unit:'LS',qty:1,rate:0,status:'not_started'},
+{code:'18.30',name:'Glass Floor',unit:'m²',qty:0,rate:2600,status:'not_started'},
+{code:'18.40',name:'Lift / Elevator',unit:'LS',qty:1,rate:0,status:'not_started'},
+]},
+{id:19,code:'19',name:'Project Management',desc:'Builder PM Fee',stages:[1,2,3,4,5,6],budget:200000,spent:100000,items:[{code:'19.10',name:'Project Management Fee',unit:'LS',qty:1,rate:200000,status:'active'}]},
+{id:20,code:'20',name:'Development Costs',desc:'Council Contributions, QBCC Levy — TBC',stages:[1,6],budget:0,spent:0,
+items:[{code:'20.10',name:'Council Infrastructure Charges — TBC',unit:'LS',qty:1,rate:0,status:'not_started'},{code:'20.20',name:'QBCC Levy — TBC',unit:'LS',qty:1,rate:0,status:'not_started'}]},
+];
+
+const CC_JOB_OPTS=['active','quoting','complete','not_used','deactivated'];
+const CC_JOB_LBL={active:'Active',quoting:'Quoting',complete:'Complete',not_used:'Not Used',deactivated:'Deactivated'};
+const CC_JOB_CLS={active:'ba',quoting:'bh',complete:'bc',not_used:'bns',deactivated:'bd'};
+
+// ═══ GANTT DATA ═══════════════════════════════════════════════════
+const m2w=m=>Math.max(0,Math.round((m-3)*4.33));
+const GANTT_ROWS_INIT=[
+{id:'r0',ccId:1,code:'1.1',name:'Professionals',who:'Ben Redding',sm:0,em:35},
+{id:'r1',ccId:1,code:'1.3',name:'Site Costs / Scaffold',who:'All Round Scaffolding',sm:0,em:35},
+{id:'r2',ccId:1,code:'1.6',name:'Crane Hire',who:"Davo's Cranes",sm:0,em:30},
+{id:'r3',ccId:1,code:'1.9',name:'Skip Bins',who:'Retrac',sm:0,em:35},
+{id:'r4',ccId:2,code:'2.0',name:'Earth Works',who:'K&T Earthmoving',sm:0,em:8},
+{id:'r5',ccId:3,code:'3.0',name:'Concrete',who:'Damon Harris',sm:2,em:16},
+{id:'r6',ccId:3,code:'3.4',name:'Formwork',who:'Currumbin Formwork',sm:3,em:12},
+{id:'r7',ccId:3,code:'3.6',name:'Termite',who:'Flick',sm:2,em:35},
+{id:'r8',ccId:4,code:'4.1',name:'Steel — Reo',who:'ARC Reo / Miguel',sm:3,em:13},
+{id:'r9',ccId:4,code:'4.3',name:'Structural Steel',who:'Bowden Welding',sm:6,em:26},
+{id:'r10',ccId:5,code:'5.2',name:'Bricklayer',who:'Tim Rhodes',sm:6,em:26},
+{id:'r11',ccId:5,code:'5.4',name:'Renderer',who:'Max Renderer',sm:20,em:32},
+{id:'r12',ccId:6,code:'6.3',name:'Carpenter — Frame',who:'Hampton Homes',sm:6,em:13},
+{id:'r13',ccId:6,code:'6.5',name:'External Cladding',who:'Hampton Homes',sm:12,em:26},
+{id:'r14',ccId:6,code:'6.6',name:'Soffit',who:'Hampton Homes',sm:14,em:24},
+{id:'r15',ccId:6,code:'6.7',name:'Fixout',who:'Hampton Homes',sm:27,em:33},
+{id:'r16',ccId:6,code:'6.8',name:'Final Fit Off',who:'Hampton Homes',sm:31,em:35},
+{id:'r17',ccId:7,code:'7.1',name:'Windows & Doors',who:'YY Windows',sm:9,em:26},
+{id:'r18',ccId:7,code:'7.2',name:'Cabinet Maker',who:'TBC',sm:27,em:32},
+{id:'r19',ccId:7,code:'7.5',name:'Handrails & Stairs',who:'George',sm:28,em:33},
+{id:'r20',ccId:8,code:'8.1',name:'Roof',who:'TBC Roofer',sm:17,em:28},
+{id:'r21',ccId:9,code:'9.0',name:'Plasterer',who:'Dave Norwood',sm:27,em:32},
+{id:'r22',ccId:10,code:'10.0',name:'Electrical',who:'Lighthouse Electrical',sm:2,em:33},
+{id:'r23',ccId:10,code:'10.8',name:'Air Conditioning',who:'Lighthouse Elec',sm:27,em:33},
+{id:'r24',ccId:11,code:'11.0',name:'Plumber / Gas',who:'Plumb Wise',sm:2,em:33},
+{id:'r25',ccId:12,code:'12.0',name:'Waterproofing',who:'Hampton Homes',sm:2,em:33},
+{id:'r26',ccId:12,code:'12.T',name:'Tiler',who:'IXL Tiling',sm:27,em:33},
+{id:'r27',ccId:12,code:'12.S',name:'Stone Cladding',who:'Stone Style',sm:26,em:33},
+{id:'r28',ccId:13,code:'13.0',name:'Painter',who:'Swansons Painting',sm:30,em:35},
+{id:'r29',ccId:14,code:'14.2',name:'Garage Door & Gates',who:'TBC',sm:32,em:35},
+{id:'r30',ccId:15,code:'15.0',name:'Shower Screens / Robes',who:'TBC',sm:32,em:35},
+{id:'r31',ccId:16,code:'16.0',name:'Floor Coverings',who:'TBC',sm:32,em:35},
+{id:'r32',ccId:17,code:'17.0',name:'Landscaping & Pool',who:'TBC / Zenith',sm:33,em:35},
+{id:'r33',ccId:18,code:'18.1',name:'Fireplace & Special Items',who:'TBC',sm:26,em:33},
+{id:'r34',ccId:19,code:'19.0',name:'Project Management',who:'Hampton Homes',sm:0,em:35},
+];
+
+function initGanttPainted(){
+  const p={};
+  GANTT_ROWS_INIT.forEach(row=>{
+    p[row.id]={};
+    const sw=m2w(row.sm), ew=Math.min(143,m2w(row.em)+4);
+    for(let w=sw;w<=ew;w++) p[row.id][w]=true;
+  });
+  return p;
+}
+
+// ═══ CONTACTS ═══════════════════════════════════════════════════════
+const CTRAW=[
+[1,'PM','PM','Builder','Hampton Homes','Claus Sievers','0413 050 551','claus@4cconstruction.com.au'],
+[2,'PM','PM','Site Supervisor','Hampton Homes','Wayne Chisholm','0448 440 662',''],
+[3,'01','01.11','Surveyor','Shlencker Surveying','','07 55736744',''],
+[4,'01','01.12','Architecture / Drafting','Michael Gortsilas','Michael Gortsilas','0416 502 599',''],
+[5,'01','01.12','Interior Design','Tommy K Design','Tommy Kanchanasinith','0402 466 552','tkttot@gmail.com'],
+[6,'01','01.16','Engineering','Ben Redding','Ben Redding','TBC',''],
+[7,'01','01.20','Certifier','BCC','Dan Oliver','07 3394 2744','dan@buildingcertification.com.au'],
+[8,'01','01.50','Safety / OHS','Auzki Safety','Jeff Rose','0448 116 484','auzkiaustralia@gmail.com'],
+[9,'01','01.70','Crane Hire',"Davo's Cranes",'Adam','0428 494 464','adam@davoscranes.com.au'],
+[10,'01','01.80','Scaffolding','All Round Scaffolding','Jason','0418 155 615','arsestimating@bigpond.com'],
+[11,'01','01.90','Skip Bins','Retrac Skip Bins','','55289011',''],
+[12,'01','01.90','Skip Bins','United Waste Services','','3807 7077','sales@unitedhire.com.au'],
+[13,'01','01.95','Cleaner','Helena Cleaning','Helena','0414 272 161','helena@st.net.au'],
+[14,'02','02.10','Earthworks','K&T Earthmoving','Kev','0418 887 575',''],
+[15,'02','02.50','Fill Materials','Mitchelmore Transport','Shane','07 5529 8700','dispatch@mitchelmores.com.au'],
+[16,'03','03.10','Concrete Supply','Hanson','Peter Smith','132 662','denny.lambert@hanson.com.au'],
+[17,'03','03.20','Concreter','Damon Harris Concreting','Damon Harris','0418 753 700','dmdharris@bigpond.com'],
+[18,'03','03.30','Concrete Pump','TWT','Lisa','0404444274',''],
+[19,'03','03.40','Formwork','Currumbin Formwork','Rhys McGregor','0477 706 456','shaun@currumbinconstructions.com.au'],
+[20,'03','03.50','Concrete Cutting','Concut','Lee Milton','0418 769 839','sales@concutqld.com.au'],
+[21,'03','03.60','Termite','Flick','Jono Dart','07 5512 0710','Jono.Dart@flick-anticimex.com.au'],
+[22,'04','04.10','Reo Supply','ARC Reo','Tanya','07 5671 9400','arcgoldcoastsales@arcreo.com.au'],
+[23,'04','04.20','Steel Fixer','Ultimate Reo','Miguel Freitas','0408 359 623','ultimatereo4u@gmail.com'],
+[24,'04','04.21','Post Tension','Impact PT','Jake Fairweather','0429 307 872','jfairweather@impactpt.com.au'],
+[25,'04','04.30','Structural Steel','Bowden Welding','Tony / Rick','0431 967 793','admin@bowdenweldingservice.com.au'],
+[26,'05','05.10','Block Supply','Adbri Masonry','Melita Huth','07 3382 4100',''],
+[27,'05','05.20','Block Layer','Brick Rhodes','Tim Rhodes','0400673220','brickrhodes6@gmail.com'],
+[28,'05','05.20','Block Layer','White and Ellaby','Mark Ellaby','0419027249','whiteandellaby@gmail.com'],
+[29,'05','05.40','Renderer','Max Teixeira Rendering','Max Teixeira','0432 512 829','max.rendering@hotmail.com'],
+[30,'06','06.00','Timber Supply','Bunnings Gaven','','55143100',''],
+[31,'06','06.00','Carpentry','C1 Constructions','Dave Palmer','0432 270 466','dpalmerconstructions@gmail.com'],
+[32,'07','07.10','Windows & Doors','YY Windows','','TBC',''],
+[33,'07','07.10','Aluminium Windows','G.James Glass','Brendan Ruyg','07 3877 2826','brendan_ruyg@gjames.com.au'],
+[34,'07','07.20','Cabinet Maker','BMG Cabinets','Brett Granville','0408 476 054','bmgcabinets@bigpond.com'],
+[35,'07','07.30','Bench Tops','Southport Stone','Norm','0413758751',''],
+[36,'07','07.40','Balustrades','Innovative Stainless','Darryl Pather','07 3899 1844',''],
+[37,'07','07.50','Curved Stairs','Arden','John Hall','07 3267 6100','john.h@arden.net.au'],
+[38,'08','08.20','Roofing','Urban Roofing','Brad','0420 287 804','sales@urbanroof.com.au'],
+[39,'09','09.10','Insulation','Outback Insulation','Rhiane','07 3888 9919',''],
+[40,'09','09.20','Plasterer','Swan Plastering','Clinton Swan','5522 0336',''],
+[41,'09','09.20','Plasterer','NA Contracting','Danny Simpson','0413 158 061','danny@nacontracting.com.au'],
+[42,'10','10.10','Electrician','Lighthouse Electrical','Ash Jarvis','0419709183','ashley@lighthouseelectrical.com'],
+[43,'10','10.43','Security','M4S','Ian Lengram','0448000404',''],
+[44,'10','10.70','Mechanical Vent','J&D Ventilation','Rodney','0418 741 754',''],
+[45,'10','10.80','Air Conditioning','Airlock Services','Matt','0415 653 408',''],
+[46,'10','10.90','Solar','Jock Barton Solar','Jock Barton','0414738629',''],
+[47,'11','11.10','Plumber','Plumb Wise','Matt Reeves','0488 082 281','plumb_wise@bigpond.com'],
+[48,'12','12.10','Stone Cladding','Stone Style','Michael Wyatt','0431 925 332','michael@stonestyle.net.au'],
+[49,'12','12.20','Tiler','IXL Tiling','Andy Gower','','ixltiling@optusnet.com.au'],
+[50,'12','12.30','Waterproofing','Wetfix','Trent','5522 1177','info@wetfix.com.au'],
+[51,'13','13.10','Painter','Swansons Painting','Jason','0418763115','info@swanpainting.com.au'],
+[52,'13','13.10','Painter','SMB Painting','Shaun Beckwith','0408 441 118',''],
+[53,'14','14.20','Garage Door','Brisbane & Bayside Garage Doors','Trinity','07 3888 1577',''],
+[54,'14','14.40','Screens','Lifesaver Fabrication','Matt Cairney','0411 694 257',''],
+[55,'15','15.10','Shower Screens','Supreme Screens','Kerry Whear','0408 763 874',''],
+[56,'16','16.10','Timber Flooring','Wildwood Flooring','Roy Miller','0418 721 939','roy@wildwoodflooring.com.au'],
+[57,'17','17.10','Landscaping','Greenform Landscapes','Tim Wolfe','0423 307 727',''],
+[58,'17','17.20','Swimming Pool','Zenith Pools','Craig Mathison','0414 708 572',''],
+[59,'18','18.10','Fireplace Install','GC Gas Fitters','Andy','0416 146 907',''],
+[60,'18','18.40','Lift / Elevator','Sunshine Coast Elevators','Darren','TBC',''],
+];
+
+// ═══ SUPERVISOR BOARDS INIT ════════════════════════════════════════
+const SUP_PERSON_INIT=[
+{key:'todo',name:'General To Do',color:'ba',tasks:[
+{id:1,text:'BASEMENT fire door — Steel Sliding door (HH design & construct)',who:'Eddie',cc:'06',dueDate:'',priority:'high',notes:'',done:false},
+{id:2,text:'BASEMENT — Post tension setout in basement',who:'Carpenters',cc:'04',dueDate:'',priority:'medium',notes:'',done:false},
+{id:3,text:'TOP — BREEZEWAY — Barge Flashings (once framed square)',who:'Carpenters',cc:'08',dueDate:'',priority:'medium',notes:'',done:false},
+{id:4,text:'TOP — MASTERSUITE — Entry door Veneer setout',who:'Carpenters',cc:'06',dueDate:'',priority:'medium',notes:'',done:false},
+{id:5,text:'GEORGE — COPPER — Garage Door detailing',who:'George',cc:'04',dueDate:'',priority:'medium',notes:'',done:false},
+{id:6,text:'ALL — FIXOUT — Full materials take off required',who:'All',cc:'06',dueDate:'',priority:'high',notes:'',done:false},
+{id:7,text:'TOP — ELECTRICAL — Kitchen under floor heating',who:'Eddie',cc:'10',dueDate:'',priority:'medium',notes:'',done:false},
+{id:8,text:'BASEMENT — Lift foyer fire barn door',who:'Eddie',cc:'18',dueDate:'',priority:'medium',notes:'',done:false},
+{id:9,text:'TOP — BREEZEWAY — Organise concrete pour @ glass floor',who:'Wayne',cc:'03',dueDate:'',priority:'high',notes:'',done:false},
+{id:10,text:'GEORGE — COPPER — Columns',who:'George',cc:'04',dueDate:'',priority:'medium',notes:'',done:false},
+{id:11,text:'TOP — GLASS FLOOR — Order steel frame for glass',who:'George',cc:'18',dueDate:'',priority:'high',notes:'',done:false},
+{id:12,text:'MID Flooring — Chicago Air CFS50 Flooring Stapler Gun order',who:'Eddie',cc:'16',dueDate:'',priority:'low',notes:'',done:false},
+]},
+{key:'eddie',name:'Eddie',color:'bt',tasks:[
+{id:20,text:'Corten Garden Edging — order',who:'Eddie',cc:'17',dueDate:'',priority:'low',notes:'',done:false},
+{id:21,text:'Heavy LIFT Glazier — 2x3 panel DG windows H:2770',who:'Eddie',cc:'07',dueDate:'',priority:'high',notes:'H:2770 x 1385, 1070, 1480mm & H:2360 x 1385, 1070, 1550mm',done:false},
+{id:22,text:'Research: 15mm marine ply 2400x1200 — get quote',who:'Eddie',cc:'06',dueDate:'',priority:'medium',notes:'For teak batten substrate',done:false},
+{id:23,text:'Rust converter & gal on scaffolding',who:'Eddie',cc:'01',dueDate:'',priority:'low',notes:'',done:false},
+{id:24,text:'Replace rusty wire with gal wire',who:'Eddie',cc:'01',dueDate:'',priority:'low',notes:'',done:false},
+{id:25,text:'Temp fencing — rust converter',who:'Eddie',cc:'01',dueDate:'',priority:'low',notes:'',done:false},
+]},
+{key:'wayne',name:'Wayne',color:'bh',tasks:[
+{id:30,text:'Termite Solution — full written details from Flick',who:'Wayne',cc:'03',dueDate:'',priority:'high',notes:'Need by ASAP',done:false},
+{id:31,text:'Vertiblocks — order and delivery coordination',who:'Wayne',cc:'05',dueDate:'',priority:'high',notes:'',done:false},
+{id:32,text:'External BBQ design — finalise',who:'Wayne',cc:'17',dueDate:'',priority:'low',notes:'',done:false},
+]},
+{key:'alanJulie',name:'Alan & Julie',color:'bp',tasks:[
+{id:40,text:'PLUMBER — Irrigation location, water source, external taps?',who:'Alan & Julie',cc:'11',dueDate:'',priority:'medium',notes:'',done:false},
+{id:41,text:'PAINTER — Basement finishes: ceilings? wall finishes?',who:'Alan & Julie',cc:'13',dueDate:'',priority:'medium',notes:'',done:false},
+{id:42,text:'Kev Tilly — WiFi & TV: arrange appointment',who:'Alan & Julie',cc:'10',dueDate:'',priority:'medium',notes:'',done:false},
+{id:43,text:'MIRRORS (Ensuites) — How are they mounted?',who:'Alan & Julie',cc:'12',dueDate:'',priority:'medium',notes:'',done:false},
+{id:44,text:'ELECTRICAL — Large gang switches supplier',who:'Alan & Julie',cc:'10',dueDate:'',priority:'medium',notes:'',done:false},
+{id:45,text:'POWDER ROOM — Vanity leg connection detail',who:'Alan & Julie',cc:'07',dueDate:'',priority:'medium',notes:'',done:false},
+{id:46,text:'MASTER ENS — Confirm Mirror Selection and size',who:'Alan & Julie',cc:'12',dueDate:'',priority:'medium',notes:'Stone dependant',done:false},
+{id:47,text:'TEAK INDO — Teak Flooring ETA confirm',who:'Alan & Julie',cc:'16',dueDate:'',priority:'high',notes:'',done:false},
+{id:48,text:'MASTER SUITE ENTRY DOOR — tile transition, 5mm waterstop step',who:'Alan & Julie',cc:'06',dueDate:'',priority:'medium',notes:'',done:false},
+{id:49,text:'MAIN ENTRY DOOR — detail confirm, pull handle, lock mechanism',who:'Alan & Julie',cc:'07',dueDate:'',priority:'medium',notes:'',done:false},
+{id:50,text:'MAIN ENTRY DOOR STEEL — order from China to match stairs/bar',who:'Alan & Julie',cc:'07',dueDate:'',priority:'medium',notes:'',done:false},
+]},
+{key:'claus',name:'Claus T',color:'bc',tasks:[
+{id:60,text:'Sliding Gate — Detailed shop drawings 271025',who:'Claus T',cc:'14',dueDate:'',priority:'high',notes:'',done:false},
+{id:61,text:'Glass Floor — Engineering solution required for driveway slab',who:'Claus T',cc:'18',dueDate:'',priority:'high',notes:'',done:false},
+{id:62,text:'Teak flooring detail — 15x40mm battens, 15mm teak glued & secret nailed',who:'Claus T',cc:'16',dueDate:'',priority:'high',notes:'',done:false},
+{id:63,text:'Approve Adbri order (CE email)',who:'Claus T',cc:'05',dueDate:'',priority:'high',notes:'',done:false},
+{id:64,text:'Approve Shadow line skirting order (CE email)',who:'Claus T',cc:'09',dueDate:'',priority:'high',notes:'',done:false},
+{id:65,text:'Bowden — c2 post confirmation',who:'Claus T',cc:'04',dueDate:'',priority:'high',notes:'',done:false},
+{id:66,text:'Bowden — c1 cast in plate confirmation',who:'Claus T',cc:'04',dueDate:'',priority:'high',notes:'',done:false},
+]},
+{key:'ctFrost',name:'Questions — CT / Frost',color:'bd',tasks:[
+{id:70,text:'CT — Depth of driveway drainage grates',who:'Claus T',cc:'02',dueDate:'',priority:'high',notes:'',done:false},
+{id:71,text:'CT — Driveway drainage: 150mm stormy and agg line under/inside footing?',who:'Claus T',cc:'02',dueDate:'',priority:'high',notes:'',done:false},
+{id:72,text:'CT — ELEC — Reed Sensor: top/bottom/side of door?',who:'Claus T',cc:'10',dueDate:'',priority:'medium',notes:'',done:false},
+{id:73,text:'CT — Light switch heights, security keypad & gate control locations',who:'Claus T',cc:'10',dueDate:'',priority:'medium',notes:'',done:false},
+]},
+{key:'carpOdd',name:'Carpentry / Odd Jobs',color:'bns',tasks:[
+{id:80,text:'Clear silt from drain next to main driveway',who:'Carpenters',cc:'02',dueDate:'',priority:'low',notes:'',done:false},
+{id:81,text:'Grout in PT pipes and pans',who:'Carpenters',cc:'03',dueDate:'',priority:'medium',notes:'',done:false},
+]},
+];
+
+// ═══ STATE INIT ════════════════════════════════════════════════════
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function initCCTasks(){
+  const t={};
+  CC_DATA.forEach(cc=>{t[cc.code]={};cc.items.forEach(item=>{t[cc.code][item.code]=[];});});
+  t['06']['06.50']=[
+    {id:901,text:'Re-nail fascia all areas',who:'Carpenters',dueDate:'',priority:'high',notes:'',done:false},
+    {id:902,text:'Lower driveway form and reo',who:'Carpenters',dueDate:'',priority:'high',notes:'',done:false},
+    {id:903,text:'Secure fixed slider/window panes to jamb',who:'Carpenters',dueDate:'',priority:'medium',notes:'',done:false},
+  ];
+  t['06']['06.60']=[
+    {id:904,text:'External hoods: 6mm FC underside soffit',who:'Carpenters',dueDate:'',priority:'medium',notes:'',done:false},
+    {id:905,text:'Frame breezeway roof opening (square for teak shiplap)',who:'Carpenters',dueDate:'',priority:'high',notes:'',done:false},
+  ];
+  t['06']['06.99']=[
+    {id:906,text:'Water test all windows',who:'Carpenters',dueDate:'',priority:'high',notes:'',done:false},
+    {id:907,text:'Master Suite entry door — veneers & resin',who:'Carpenters',dueDate:'',priority:'medium',notes:'',done:false},
+  ];
+  t['07']['07.10']=[
+    {id:910,text:'Confirm handrail glass thickness — George',who:'George',dueDate:'',priority:'high',notes:'',done:false},
+    {id:911,text:'George front door steel — get quote',who:'George',dueDate:'',priority:'medium',notes:'',done:false},
+    {id:912,text:'Confirm extras/variations document — George',who:'George',dueDate:'',priority:'medium',notes:'',done:false},
+  ];
+  t['07']['07.40']=[
+    {id:913,text:'Mid bar cabinetry — George',who:'George',dueDate:'',priority:'medium',notes:'',done:false},
+    {id:914,text:'Stone confirm remaining items',who:'George',dueDate:'',priority:'medium',notes:'',done:false},
+  ];
+  t['10']['10.10']=[
+    {id:920,text:'Range hood exhaust routing — confirm',who:'Ash Jarvis',dueDate:'',priority:'high',notes:'',done:false},
+    {id:921,text:'A/C rough-in when structure ready',who:'Ash Jarvis',dueDate:'',priority:'medium',notes:'',done:false},
+  ];
+  t['11']['11.10']=[
+    {id:930,text:'Water tank connections — Dia 3350, H 3000',who:'Matt Reeves',dueDate:'',priority:'high',notes:'Fresh water tank',done:false},
+    {id:931,text:'Bush fire roof sprinkler system — pipes to confirm',who:'Matt Reeves',dueDate:'',priority:'medium',notes:'',done:false},
+  ];
+  t['01']['01.80']=[
+    {id:940,text:'Jason: scaffold price estimate for next phase',who:'Jason All Round',dueDate:'',priority:'high',notes:'Fortnightly focus',done:false},
+    {id:941,text:'Prep for container move on-site',who:'Wayne',dueDate:'',priority:'high',notes:'',done:false},
+  ];
+  t['02']['02.60']=[
+    {id:950,text:'Drainage grates — driveway area install',who:'Wayne',dueDate:'',priority:'high',notes:'',done:false},
+  ];
+  t['18']['18.10']=[
+    {id:960,text:'Fireplace chimney routing — resolve before plaster',who:'Eddie',dueDate:'',priority:'high',notes:'Must resolve ASAP',done:false},
+  ];
+  return t;
+}
+
+function initCCSubActive(){
+  const a={};
+  CC_DATA.forEach(cc=>{
+    a[cc.code]={};
+    cc.items.forEach(item=>{a[cc.code][item.code]=(item.status==='active'||item.status==='complete');});
+  });
+  ['01.50','01.70','01.80','01.90','03.50','03.60','04.30','05.20','06.50','06.60','06.99','07.10','08.20','10.10','10.43','10.70','11.10','12.30','01.40'].forEach(code=>{
+    for(const cc of CC_DATA){if(cc.items.find(i=>i.code===code)){a[cc.code][code]=true;break;}}
+  });
+  return a;
+}
+
+const STATE={
+  tab:'dashboard',
+  ganttStart:'2024-04-01',ganttNumWeeks:144,ganttHidePast:false,
+  ganttRows:[...GANTT_ROWS_INIT],
+  ganttPainted:initGanttPainted(),
+  ganttNextId:100,ganttAddingRow:false,
+  openCC:{},
+  ccItems:CC_DATA.map(c=>({id:c.id,items:c.items.map(i=>({...i}))})),
+  ccJobStatus:{1:'active',2:'complete',3:'active',4:'active',5:'active',6:'active',7:'active',8:'active',9:'not_used',10:'active',11:'active',12:'active',13:'not_used',14:'active',15:'not_used',16:'not_used',17:'not_used',18:'not_used',19:'active',20:'not_used'},
+  supPersonBoards:SUP_PERSON_INIT.map(b=>({...b,tasks:b.tasks.map(t=>({...t})),collapsed:true,doneOpen:false})),
+  supCCCollapsed:Object.fromEntries(CC_DATA.map(c=>[c.code,true])),
+  supCCDoneOpen:Object.fromEntries(CC_DATA.map(c=>[c.code,false])),
+  supCCSubOpen:Object.fromEntries(CC_DATA.map(c=>[c.code,Object.fromEntries(c.items.map(i=>[i.code,true]))])),
+  supCCTasks:initCCTasks(),
+  supCCSubActive:initCCSubActive(),
+  supTaskNextId:2000,
+  supActiveForm:null,
+  supExpandedTasks:new Set(),
+  contacts:Object.fromEntries(CTRAW.map(c=>[c[0],{selected:false}])),
+  dirOpenCC:{},dirSearch:'',
+  defects:[],orders:[],variations:[],defectId:1,orderId:1,variationId:1,
+};
+[8,9,10,11,14,15,17,18,19,21,23,24,25,27,29,31,32,35,38,40,41,42,43,44,45,47,48,49,50,51,57,58].forEach(id=>{if(STATE.contacts[id])STATE.contacts[id].selected=true;});
+
+// ═══ LOCALSTORAGE ══════════════════════════════════════════════════
+const SAVE_KEY='hhbm_v5';
+function saveState(){
+  try{
+    const s={...STATE};
+    s.supExpandedTasks=[...STATE.supExpandedTasks];
+    s.ganttAddingRow=false;s.supActiveForm=null;
+    localStorage.setItem(SAVE_KEY,JSON.stringify(s));
+    const dot=document.getElementById('save-dot');
+    if(dot){dot.classList.add('show');setTimeout(()=>dot.classList.remove('show'),1200);}
+  }catch(e){console.warn('Save failed',e);}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return false;
+    const s=JSON.parse(raw);
+    const keys=['ganttStart','ganttNumWeeks','ganttHidePast','ganttRows','ganttPainted','ganttNextId',
+      'openCC','ccItems','ccJobStatus','supPersonBoards','supCCCollapsed','supCCDoneOpen',
+      'supCCSubOpen','supCCTasks','supCCSubActive','supTaskNextId','contacts','dirOpenCC',
+      'defects','orders','variations','defectId','orderId','variationId'];
+    keys.forEach(k=>{if(s[k]!==undefined)STATE[k]=s[k];});
+    STATE.supExpandedTasks=new Set(s.supExpandedTasks||[]);
+    return true;
+  }catch(e){return false;}
+}
+function resetData(){
+  if(!confirm('Reset all data to defaults? This cannot be undone.'))return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+// ═══ UTILS ═════════════════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const fmtM=n=>n===0?'—':'$'+Math.round(n).toLocaleString('en-AU');
+const fmtMs=n=>n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1000?'$'+(n/1e3).toFixed(0)+'K':'$'+Math.round(n).toLocaleString('en-AU');
+const priCls={high:'ph',medium:'pm',low:'pl','':'pm'};
+const priLbl={high:'High',medium:'Med',low:'Low','':''};
+let _toastTimer=null;
+function showToast(msg){
+  const el=$('toast');if(!el)return;
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+function sBadge(s,extra=''){
+  const m={complete:'bc',active:'ba',not_started:'bns',hold:'bh',quoting:'bh',not_used:'bns',deactivated:'bd'};
+  const l={complete:'Complete',active:'Active',not_started:'Not Started',hold:'On Hold',quoting:'Quoting',not_used:'Not Used',deactivated:'Deactivated'};
+  return`<span class="badge ${m[s]||'bns'} ${extra}">${l[s]||s}</span>`;
+}
+function getCCItems(id){return(STATE.ccItems.find(c=>c.id===id)||{items:[]}).items;}
+function getDefectsForCC(ccCode){return STATE.defects.filter(d=>d.cc===ccCode&&d.status!=='complete');}
+function isOverdue(dateStr){if(!dateStr)return false;return new Date(dateStr)<new Date();}
+
+// ═══ TABS ══════════════════════════════════════════════════════════
+const TABS=[
+  {id:'dashboard',label:'Dashboard'},
+  {id:'gantt',label:'Build Program'},
+  {id:'boq',label:'Cost Centres & Budget'},
+  {id:'supervisor',label:'Supervisor Tasks'},
+  {id:'defects',label:'Defects'},
+  {id:'variations',label:'Variations'},
+  {id:'orders',label:'Orders'},
+  {id:'directory',label:'Directory'},
+];
+function renderNav(){
+  const openDef=STATE.defects.filter(d=>d.status!=='complete').length;
+  const openVar=STATE.variations.filter(v=>v.status==='pending').length;
+  $('tab-nav').innerHTML=TABS.map(t=>{
+    let badge='';
+    if(t.id==='defects'&&openDef>0)badge=`<span class="tab-badge">${openDef}</span>`;
+    if(t.id==='variations'&&openVar>0)badge=`<span class="tab-badge" style="background:var(--amb)">${openVar}</span>`;
+    return`<button class="tab-btn${STATE.tab===t.id?' active':''}" onclick="setTab('${t.id}')">${t.label}${badge}</button>`;
+  }).join('');
+}
+function setTab(id){STATE.tab=id;renderNav();renderContent();}
+
+// ═══ DASHBOARD ═════════════════════════════════════════════════════
+function renderDashboard(){
+  const opT=STATE.supPersonBoards.reduce((s,b)=>s+b.tasks.filter(t=>!t.done).length,0)
+    +Object.entries(STATE.supCCTasks).reduce((s,[,subs])=>s+Object.values(subs).reduce((s2,tasks)=>s2+tasks.filter(t=>!t.done).length,0),0);
+  const bT=CC_DATA.reduce((s,c)=>s+c.budget,0);
+  const sT=CC_DATA.reduce((s,c)=>s+c.spent,0);
+  const inv=4073496,rem=4300000,tot=inv+rem,pct=Math.round(inv/tot*100);
+  const openDef=STATE.defects.filter(d=>d.status!=='complete').length;
+  const openVar=STATE.variations.filter(v=>v.status==='pending').length;
+  const approvedVar=STATE.variations.filter(v=>v.status==='approved').reduce((s,v)=>s+(parseFloat(v.cost)||0),0);
+
+  // Stage strip
+  const stages=['Stage 1 — Foundations','Stage 2 — Slab','Stage 3 — Frame','Stage 4 — Lock-up','Stage 5 — Fit-out','Stage 6 — Completion'];
+  const curStage=4;
+  const stageStrip=`<div class="stage-strip">
+    ${stages.map((s,i)=>{
+      const n=i+1;
+      let cls=n<curStage?'done':n===curStage?'current':'future';
+      return`<div class="stage-step">${i>0?`<span class="stage-arrow">›</span>`:''}
+        <span class="stage-node ${cls}">${s}</span></div>`;
+    }).join('')}
+  </div>`;
+
+  // Critical tasks (all high-priority open across all boards)
+  const critTasks=[];
+  STATE.supPersonBoards.forEach(b=>b.tasks.filter(t=>!t.done&&t.priority==='high').forEach(t=>critTasks.push({...t,board:b.name})));
+  Object.entries(STATE.supCCTasks).forEach(([cc,subs])=>Object.entries(subs).forEach(([sub,tasks])=>
+    tasks.filter(t=>!t.done&&t.priority==='high').forEach(t=>critTasks.push({...t,board:`CC ${cc}`}))));
+  critTasks.splice(8);// cap at 8
+
+  const critHtml=critTasks.length===0
+    ?`<p style="color:var(--t2);font-size:12px;padding:4px 0">No high-priority open tasks.</p>`
+    :critTasks.map(t=>`<div class="crit-task">
+      <span class="crit-dot ph"></span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${t.text}</div>
+        <div style="font-size:10px;color:var(--t2);margin-top:1px">${t.board}${t.who?' · '+t.who:''}</div>
+      </div>
+    </div>`).join('');
+
+  return`
+  ${stageStrip}
+  <div class="metric-grid">
+    <div class="metric"><div class="metric-label">Contract Value</div><div class="metric-val">${fmtMs(10000000)}</div><div class="metric-sub">Cost Plus</div></div>
+    <div class="metric"><div class="metric-label">Invested to Date</div><div class="metric-val">${fmtMs(inv)}</div><div class="metric-sub">${pct}% of est. total</div></div>
+    <div class="metric"><div class="metric-label">Remaining (est.)</div><div class="metric-val">${fmtMs(rem)}</div></div>
+    <div class="metric"><div class="metric-label">Current Stage</div><div class="metric-val">Stage 4</div><div class="metric-sub">Lock-up</div></div>
+    <div class="metric"><div class="metric-label">Open Tasks</div><div class="metric-val" style="${opT>0?'color:var(--amb)':''}">${opT}</div></div>
+    <div class="metric"><div class="metric-label">Open Defects</div><div class="metric-val" style="${openDef>0?'color:var(--red)':''}">${openDef}</div><div class="metric-sub" onclick="setTab('defects')" style="cursor:pointer;color:var(--blu)">${openDef>0?'View →':''}</div></div>
+    <div class="metric"><div class="metric-label">Pending Variations</div><div class="metric-val" style="${openVar>0?'color:var(--amb)':''}">${openVar}</div><div class="metric-sub">${approvedVar>0?'Approved: '+fmtMs(approvedVar):''}</div></div>
+  </div>
+  <div class="notice">Gold Coast construction costs +5.5% in 2026 (RLB). Olympic pipeline tightening SEQ capacity from late 2026 — procure key trades early.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">Investment Progress</div>
+      <div class="bbar-wrap"><div class="bbar"><div class="bbar-a" style="width:${pct}%"></div><div class="bbar-r" style="width:${100-pct}%"></div></div>
+      <div class="bbar-legend"><span><span class="leg-dot" style="background:var(--blu)"></span>Invested: ${fmtM(inv)}</span><span><span class="leg-dot" style="background:var(--blu-bg)"></span>Remaining: ${fmtM(rem)}</span></div></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--t2)">CC Budget Total: ${fmtM(bT)} &nbsp;·&nbsp; CC Spent: ${fmtM(sT)}</div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">High Priority Tasks <button class="btn btn-sm" onclick="setTab('supervisor')" style="font-size:10px">View all →</button></div>
+      ${critHtml}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Cost Centres <button class="btn btn-sm" onclick="setTab('boq')">Full BOQ →</button></div>
+    <div class="tbl-wrap"><table>
+      <tr><th>CC</th><th>Name</th><th>Status</th><th class="num">Budget</th><th class="num">Spent</th><th class="num">Remaining</th></tr>
+      ${CC_DATA.map(c=>{const jst=STATE.ccJobStatus[c.id]||'not_used';const r=c.budget-c.spent;return`<tr>
+        <td><b>${c.code}</b></td><td>${c.name}</td>
+        <td><span class="badge ${CC_JOB_CLS[jst]}">${CC_JOB_LBL[jst]}</span></td>
+        <td class="num">${fmtM(c.budget)}</td><td class="num">${fmtM(c.spent)}</td>
+        <td class="num" style="color:${r<0?'var(--red)':r===0?'var(--t2)':''}">${fmtM(r)}</td>
+      </tr>`;}).join('')}
+      <tr class="total-row"><td colspan="3">TOTAL</td><td class="num">${fmtM(bT)}</td><td class="num">${fmtM(sT)}</td><td class="num">${fmtM(bT-sT)}</td></tr>
+    </table></div>
+  </div>`;
+}
+
+// ═══ GANTT (date fixed + improved) ═════════════════════════════════
+let gdrag=false,gdPaint=true,gdRow=null;
+function getGanttWeeks(){
+  const start=new Date(STATE.ganttStart);const weeks=[];
+  for(let i=0;i<STATE.ganttNumWeeks;i++){const d=new Date(start);d.setDate(d.getDate()+i*7);weeks.push(d);}
+  return weeks;
+}
+function getTodayWeekIdx(){
+  const start=new Date(STATE.ganttStart);const today=new Date();
+  return Math.max(0,Math.floor((today-start)/(7*24*60*60*1000)));
+}
+function gcId(rowId,wi){return`gc-${rowId}-${wi}`;}
+function gcClass(rowId,wi){
+  const todW=getTodayWeekIdx();
+  const painted=STATE.ganttPainted[rowId]&&STATE.ganttPainted[rowId][wi];
+  return`g-cell${painted?' g-painted':''}${wi===todW?' g-today-col':''}`;
+}
+function paintCell(rowId,wi,paint){
+  if(!STATE.ganttPainted[rowId])STATE.ganttPainted[rowId]={};
+  if(paint)STATE.ganttPainted[rowId][wi]=true;
+  else delete STATE.ganttPainted[rowId][wi];
+  const el=$(gcId(rowId,wi));if(el)el.className=gcClass(rowId,wi);
+}
+function initGanttDrag(){
+  const tbl=$('gantt-tbl');if(!tbl)return;
+  tbl.addEventListener('mousedown',e=>{
+    const cell=e.target.closest('[data-rowid][data-wi]');if(!cell)return;
+    e.preventDefault();const rowId=cell.dataset.rowid,wi=parseInt(cell.dataset.wi);
+    gdrag=true;gdRow=rowId;gdPaint=!(STATE.ganttPainted[rowId]&&STATE.ganttPainted[rowId][wi]);
+    paintCell(rowId,wi,gdPaint);
+  });
+  tbl.addEventListener('mouseover',e=>{
+    if(!gdrag)return;const cell=e.target.closest('[data-rowid][data-wi]');if(!cell)return;
+    if(cell.dataset.rowid!==gdRow)return;paintCell(cell.dataset.rowid,parseInt(cell.dataset.wi),gdPaint);
+  });
+  document.addEventListener('mouseup',()=>{if(gdrag){gdrag=false;saveState();}});
+}
+
+function renderGantt(){
+  const weeks=getGanttWeeks();const todW=getTodayWeekIdx();const hp=STATE.ganttHidePast;const startWi=hp?todW:0;
+  const groups=[];let cur=null;
+  for(let wi=startWi;wi<weeks.length;wi++){
+    const d=weeks[wi];const key=d.getFullYear()*12+d.getMonth();
+    if(!cur||cur.key!==key){if(cur)groups.push(cur);cur={key,label:MN[d.getMonth()]+' '+d.getFullYear(),count:1};}
+    else cur.count++;
+  }
+  if(cur)groups.push(cur);
+  let yrRow=`<tr><th class="g-sticky" style="font-size:11px;font-weight:600;padding:4px 8px">Trade / CC</th>`;
+  if(hp&&todW>0)yrRow+=`<th class="g-past-hdr" rowspan="3" title="Past ${todW} weeks">◀ PAST</th>`;
+  const yrGroups=[];let cy=null;
+  groups.forEach(g=>{const yr2=Math.floor(g.key/12);if(!cy||cy.yr!==yr2){if(cy)yrGroups.push(cy);cy={yr:yr2,count:g.count};}else cy.count+=g.count;});
+  if(cy)yrGroups.push(cy);
+  yrGroups.forEach(y=>yrRow+=`<th colspan="${y.count}" class="g-yr-hdr">${y.yr}</th>`);
+  yrRow+='</tr>';
+  let moRow=`<tr><th class="g-sticky" style="background:var(--bg1)"></th>`;
+  groups.forEach(g=>moRow+=`<th colspan="${g.count}" class="g-mo-hdr">${g.label.replace(/\s/,'<br>')}</th>`);
+  moRow+='</tr>';
+  let wkRow=`<tr><th class="g-sticky" style="background:var(--bg0)"></th>`;
+  for(let wi=startWi;wi<weeks.length;wi++){
+    const isToday=wi===todW;
+    wkRow+=`<th class="g-wk-hdr${isToday?' g-today-hdr':''}" title="${weeks[wi].toLocaleDateString('en-AU')}">${wi%4===0?'W'+(wi+1):''}</th>`;
+  }
+  wkRow+='</tr>';
+  let body='';let lastCCId=-1;
+  STATE.ganttRows.forEach(row=>{
+    if(row.ccId!==lastCCId){
+      lastCCId=row.ccId;const cc=CC_DATA.find(c=>c.id===row.ccId);
+      body+=`<tr class="g-cc-row" onclick="openCCFromGantt(${row.ccId})">
+        <td class="g-sticky"><div class="g-cc-lbl">${cc?`<b>${cc.code}</b> ${cc.name}`:''} <span style="font-size:10px;color:var(--blu)">→ BOQ</span></div></td>`;
+      if(hp&&todW>0)body+=`<td class="g-past-cell"></td>`;
+      for(let wi=startWi;wi<weeks.length;wi++)body+=`<td class="g-cell${wi===todW?' g-today-col':''}"></td>`;
+      body+='</tr>';
+    }
+    body+=`<tr><td class="g-sticky">
+      <div class="g-row-lbl">
+        <span class="g-row-code">${row.code}</span>
+        <span class="g-row-name">${row.name}</span>
+        <span class="g-row-who">${row.who}</span>
+      </div>
+      <span class="g-row-actions"><button class="btn-xs btn-d" style="border:none;background:none;cursor:pointer;color:var(--t2)" onclick="delGanttRow('${row.id}')">×</button></span>
+    </td>`;
+    if(hp&&todW>0){const cnt=Object.keys(STATE.ganttPainted[row.id]||{}).filter(w=>parseInt(w)<todW).length;body+=`<td class="g-past-cell" title="${cnt} wks scheduled in past">${cnt>0?'●':''}</td>`;}
+    for(let wi=startWi;wi<weeks.length;wi++){
+      body+=`<td id="${gcId(row.id,wi)}" class="${gcClass(row.id,wi)}" data-rowid="${row.id}" data-wi="${wi}"></td>`;
+    }
+    body+='</tr>';
+  });
+  let addRowHtml='';
+  if(STATE.ganttAddingRow){
+    addRowHtml=`<div style="padding:8px 14px;background:var(--blu-bg);border-top:0.5px solid var(--b1);display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+      <input class="g-add-row-inp" id="g-add-code" placeholder="Code (e.g. 6.9)" style="width:90px">
+      <input class="g-add-row-inp" id="g-add-name" placeholder="Trade name" style="flex:1;min-width:120px">
+      <input class="g-add-row-inp" id="g-add-who" placeholder="Contractor" style="flex:1;min-width:120px">
+      <select class="g-add-row-inp" id="g-add-cc" style="width:140px">${CC_DATA.map(c=>`<option value="${c.id}">${c.code} ${c.name}</option>`).join('')}</select>
+      <button class="btn btn-sm btn-p" onclick="saveAddGanttRow()">Add Row</button>
+      <button class="btn btn-sm" onclick="STATE.ganttAddingRow=false;$('tab-content').innerHTML=renderGantt();initGanttDrag()">Cancel</button>
+    </div>`;
+  }
+  const todayDate=new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+  return`<div class="sec-hdr">
+    <div><div class="sec-title">Build Program — Weekly Gantt</div>
+    <div class="sec-note">Click &amp; drag cells to paint weeks. CC rows link to BOQ. Red = today (week ${todW+1}, ${todayDate}).</div></div>
+  </div>
+  <div class="gantt-wrap">
+    <div class="gantt-toolbar">
+      <button class="btn btn-sm" onclick="toggleHidePast()">${hp?'◀ Show Past Weeks':'▶ Collapse Past'}</button>
+      <button class="btn btn-sm" onclick="STATE.ganttAddingRow=true;$('tab-content').innerHTML=renderGantt();initGanttDrag()">+ Add Row</button>
+      <label style="font-size:11px;display:flex;align-items:center;gap:5px">
+        Project Start: <input type="date" value="${STATE.ganttStart}" onchange="updateGanttStart(this.value)" style="padding:3px 6px;border:0.5px solid var(--b2);border-radius:5px;font-size:11px;background:var(--bg0)">
+      </label>
+    </div>
+    <div class="gantt-legend">
+      <div class="g-leg"><span class="g-swatch" style="background:#2e7dd1"></span>Scheduled</div>
+      <div class="g-leg"><span class="g-swatch" style="background:var(--red-bg);border:1px solid var(--red)"></span>Today</div>
+      <div class="g-leg"><span class="g-swatch" style="background:var(--bg3)"></span>Past (collapsed)</div>
+    </div>
+    <div class="g-scroll">
+      <table class="g-tbl" id="gantt-tbl">
+        <thead>${yrRow}${moRow}${wkRow}</thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+    ${addRowHtml}
+  </div>`;
+}
+function toggleHidePast(){STATE.ganttHidePast=!STATE.ganttHidePast;$('tab-content').innerHTML=renderGantt();initGanttDrag();saveState();}
+function openCCFromGantt(id){STATE.tab='boq';STATE.openCC[id]=true;renderNav();renderContent();}
+function delGanttRow(id){if(!confirm('Delete this row?'))return;STATE.ganttRows=STATE.ganttRows.filter(r=>r.id!==id);$('tab-content').innerHTML=renderGantt();initGanttDrag();saveState();}
+function saveAddGanttRow(){
+  const code=$('g-add-code')?.value.trim()||'';const name=$('g-add-name')?.value.trim()||'';
+  const who=$('g-add-who')?.value.trim()||'';const ccId=parseInt($('g-add-cc')?.value)||1;
+  if(!name){showToast('Enter a trade name.');return;}
+  const id='r'+STATE.ganttNextId++;
+  STATE.ganttRows.push({id,ccId,code,name,who,sm:0,em:0});STATE.ganttPainted[id]={};
+  STATE.ganttAddingRow=false;$('tab-content').innerHTML=renderGantt();initGanttDrag();saveState();
+}
+function updateGanttStart(val){
+  if(Object.values(STATE.ganttPainted).some(p=>Object.keys(p).length>0)){
+    if(!confirm('Changing start date will clear painted cells. Continue?'))return;
+    STATE.ganttRows.forEach(r=>{STATE.ganttPainted[r.id]={};});
+  }
+  STATE.ganttStart=val;$('tab-content').innerHTML=renderGantt();initGanttDrag();saveState();
+}
+
+// ═══ BOQ ═══════════════════════════════════════════════════════════
+function renderBOQ(){
+  const bT=CC_DATA.reduce((s,c)=>s+c.budget,0),sT=CC_DATA.reduce((s,c)=>s+c.spent,0);
+  const inv=4073496,rem=4300000,tot=inv+rem,pct=Math.round(inv/tot*100);
+  let html=`<div class="sec-hdr">
+    <div><div class="sec-title">Cost Centres &amp; Budget — 44 Billiau Rd</div>
+    <div class="sec-note">Budget per CC. Rates editable. GC market rates 2026 (+5.5% RLB).</div></div>
+    <button class="btn btn-sm" onclick="exportBOQ()">Export CSV</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Investment Summary</div>
+    <div class="bbar-wrap"><div class="bbar"><div class="bbar-a" style="width:${pct}%"></div><div class="bbar-r" style="width:${100-pct}%"></div></div>
+    <div class="bbar-legend"><span><span class="leg-dot" style="background:var(--blu)"></span>Invested: ${fmtM(inv)}</span><span><span class="leg-dot" style="background:var(--blu-bg)"></span>Remaining: ${fmtM(rem)}</span><span>CC Budget Total: ${fmtM(bT)}</span></div></div>
+  </div>`;
+  CC_DATA.forEach(cc=>{
+    const items=getCCItems(cc.id);
+    const calcTot=items.reduce((s,i)=>{const q=parseFloat(i.qty)||0,r=parseFloat(i.rate)||0;return s+(q>0&&r>0?q*r:(q===1&&r>0?r:0));},0);
+    const jst=STATE.ccJobStatus[cc.id]||'not_used';
+    const rem2=cc.budget-cc.spent;
+    const isDeac=(jst==='deactivated'||jst==='not_used');
+    html+=`<div class="acc-wrap${isDeac?' deac':''}" id="cc-wrap-${cc.id}">
+      <div class="acc-head" onclick="toggleCC(${cc.id})">
+        <span class="acc-num">${cc.code}</span>
+        <span class="acc-title">${cc.name}</span>
+        <div class="acc-budget-strip">
+          <span class="acc-bval" style="color:var(--t2)">Budget: <b>${fmtM(cc.budget)}</b></span>
+          <span class="acc-bval" style="color:var(--t1)">Spent: <b>${fmtM(cc.spent)}</b></span>
+          <span class="acc-bval" style="color:${rem2<0?'var(--red)':'var(--grn)'}">Rem: <b>${fmtM(rem2)}</b></span>
+          <select class="cc-sel" onclick="event.stopPropagation()" onchange="updCCJobStatus(${cc.id},this.value)">
+            ${CC_JOB_OPTS.map(o=>`<option value="${o}"${jst===o?' selected':''}>${CC_JOB_LBL[o]}</option>`).join('')}
+          </select>
+        </div>
+        <span class="acc-chev${STATE.openCC[cc.id]?' open':''}" id="cc-chev-${cc.id}">▼</span>
+      </div>
+      <div class="acc-body${STATE.openCC[cc.id]?' open':''}" id="cc-body-${cc.id}">
+        <div style="overflow-x:auto">
+        <table style="min-width:560px">
+          <tr><th style="min-width:60px">Code</th><th style="min-width:190px">Item</th><th>Unit</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Total</th><th>Status</th></tr>
+          ${items.map((item,idx)=>{const q=parseFloat(item.qty)||0,r=parseFloat(item.rate)||0;const t=q>0&&r>0?q*r:(q===1&&r>0?r:0);return`<tr>
+            <td style="font-size:10px;color:var(--t2)">${item.code}</td><td>${item.name}</td>
+            <td style="font-size:11px">${item.unit}</td>
+            <td class="num"><input class="qty-inp" type="number" value="${item.qty}" min="0" step="any" onchange="updateItem(${cc.id},${idx},'qty',this.value)"></td>
+            <td class="num"><input class="rate-inp" type="number" value="${item.rate}" min="0" step="any" onchange="updateItem(${cc.id},${idx},'rate',this.value)"></td>
+            <td class="num" id="it-${cc.id}-${idx}" style="font-weight:${t>0?600:400}">${fmtM(t)}</td>
+            <td><select style="font-size:11px;padding:2px 4px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg0)" onchange="updateItem(${cc.id},${idx},'status',this.value)">
+              ${['complete','active','not_started','hold'].map(s=>`<option value="${s}"${item.status===s?' selected':''}>${s.replace('_',' ')}</option>`).join('')}
+            </select></td>
+          </tr>`;}).join('')}
+        </table></div>
+        <div class="acc-footer">
+          <button class="btn btn-sm" onclick="addCCItem(${cc.id})">+ Add line item</button>
+          <span style="font-size:11px;color:var(--t2);margin-left:auto">Calc total: <b>${fmtM(calcTot)}</b></span>
+        </div>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+function toggleCC(id){STATE.openCC[id]=!STATE.openCC[id];const b=$(`cc-body-${id}`),c=$(`cc-chev-${id}`);if(b)b.classList.toggle('open',STATE.openCC[id]);if(c)c.classList.toggle('open',STATE.openCC[id]);saveState();}
+function updateItem(ccId,idx,field,val){
+  const cc=STATE.ccItems.find(c=>c.id===ccId);if(!cc)return;
+  const item=cc.items[idx];if(!item)return;
+  if(field==='qty'||field==='rate')item[field]=parseFloat(val)||0;else item[field]=val;
+  const q=parseFloat(item.qty)||0,r=parseFloat(item.rate)||0;
+  const t=q>0&&r>0?q*r:(q===1&&r>0?r:0);
+  const el=$(`it-${ccId}-${idx}`);if(el){el.textContent=fmtM(t);el.style.fontWeight=t>0?600:400;}
+  saveState();
+}
+function addCCItem(ccId){
+  const cc=STATE.ccItems.find(c=>c.id===ccId);if(!cc)return;
+  const ccD=CC_DATA.find(c=>c.id===ccId);
+  cc.items.push({code:`${ccD.code}.${cc.items.length+1}`,name:'New Item',unit:'LS',qty:1,rate:0,status:'not_started'});
+  STATE.openCC[ccId]=true;$('tab-content').innerHTML=renderBOQ();saveState();
+}
+function updCCJobStatus(id,val){STATE.ccJobStatus[id]=val;$('tab-content').innerHTML=renderBOQ();saveState();}
+function exportBOQ(){
+  let csv='CC,Name,Item Code,Item,Unit,Qty,Rate,Total,Status\n';
+  CC_DATA.forEach(cc=>{getCCItems(cc.id).forEach(i=>{const q=parseFloat(i.qty)||0,r=parseFloat(i.rate)||0;const t=q>0&&r>0?q*r:(q===1&&r>0?r:0);csv+=`"${cc.code}","${cc.name}","${i.code}","${i.name}","${i.unit}",${i.qty},${i.rate},${t},"${i.status}"\n`;});});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='44Billiau_BOQ.csv';a.click();
+}
+
+// ═══ SUPERVISOR TASKS ══════════════════════════════════════════════
+function renderTaskCard(task,boardKey,subCode,isCC){
+  const expanded=STATE.supExpandedTasks.has(task.id);
+  const dueTxt=task.dueDate?`<span class="task-due-tag${isOverdue(task.dueDate)&&!task.done?' overdue':''}">${task.dueDate}</span>`:'';
+  const priDot=task.priority?`<span class="task-pri ${priCls[task.priority]}" title="${priLbl[task.priority]}"></span>`:'';
+  return`<div class="task-card${task.done?' done-card':''}" id="tc-${task.id}">
+    <div class="task-card-main" onclick="toggleTaskExpand(${task.id})">
+      <button class="task-chk${task.done?' done':''}" onclick="event.stopPropagation();checkTask('${boardKey}','${subCode||''}',${task.id},${isCC})">${task.done?'✓':''}</button>
+      ${priDot}
+      <span class="task-card-text">${task.text}</span>
+      ${dueTxt}
+      <button class="task-del" onclick="event.stopPropagation();delTask('${boardKey}','${subCode||''}',${task.id},${isCC})">×</button>
+    </div>
+    <div class="task-detail${expanded?' open':''}">
+      ${task.who?`<div class="task-detail-row"><b>Assigned:</b> ${task.who}</div>`:''}
+      ${task.notes?`<div class="task-detail-row"><b>Notes:</b> ${task.notes}</div>`:''}
+      ${task.dueDate?`<div class="task-detail-row"><b>Due:</b> ${task.dueDate}${isOverdue(task.dueDate)&&!task.done?' <span style="color:var(--red);font-weight:500">(Overdue)</span>':''}</div>`:''}
+      ${task.priority?`<div class="task-detail-row"><b>Priority:</b> ${priLbl[task.priority]}</div>`:''}
+    </div>
+  </div>`;
+}
+function renderAddForm(boardKey,subCode,isCC){
+  const formKey=JSON.stringify({boardKey,subCode,isCC});
+  const active=STATE.supActiveForm&&JSON.stringify(STATE.supActiveForm)===formKey;
+  if(!active)return`<button class="btn btn-xs" style="margin:4px 0" onclick="openAddForm('${boardKey}','${subCode||''}',${isCC})">+ Add task</button>`;
+  return`<div class="task-add-form">
+    <div class="task-add-row"><input class="task-add-inp wide" id="af-text" placeholder="Task description (required)" autofocus></div>
+    <div class="task-add-row">
+      <input class="task-add-inp narrow" id="af-who" placeholder="Assigned to">
+      <input class="task-add-inp narrow" id="af-due" type="date" title="Due date">
+      <select class="task-add-inp" id="af-pri" style="width:80px">
+        <option value="">Priority</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+      </select>
+      <input class="task-add-inp wide" id="af-notes" placeholder="Notes">
+    </div>
+    <div style="display:flex;gap:5px">
+      <button class="btn btn-xs btn-p" onclick="saveTask('${boardKey}','${subCode||''}',${isCC})">Save</button>
+      <button class="btn btn-xs" onclick="STATE.supActiveForm=null;renderSupervisorInPlace()">Cancel</button>
+    </div>
+  </div>`;
+}
+function renderPersonBoard(board,bi){
+  const activeTasks=board.tasks.filter(t=>!t.done);const doneTasks=board.tasks.filter(t=>t.done);
+  const highCnt=activeTasks.filter(t=>t.priority==='high').length;
+  return`<div class="sup-board" id="pb-${board.key}">
+    <div class="sup-board-hdr" onclick="togglePersonBoard(${bi})">
+      <span class="badge ${board.color}">${board.name}</span>
+      <span class="sup-board-meta">${activeTasks.length} open${highCnt>0?` · <span style="color:var(--red);font-weight:500">${highCnt} high</span>`:''}${doneTasks.length>0?' · '+doneTasks.length+' done':''}</span>
+      <span class="sup-board-chev${!board.collapsed?' open':''}">▼</span>
+    </div>
+    <div class="sup-board-body${!board.collapsed?' open':''}">
+      ${activeTasks.map(t=>renderTaskCard(t,board.key,null,false)).join('')}
+      ${renderAddForm(board.key,null,false)}
+      ${doneTasks.length>0?`<div class="done-section">
+        <div class="done-section-hdr" onclick="togglePersonDone(${bi})"><span>Completed (${doneTasks.length})</span><span>${board.doneOpen?'▲':'▶'}</span></div>
+        <div class="done-section-body${board.doneOpen?' open':''}">${doneTasks.map(t=>renderTaskCard(t,board.key,null,false)).join('')}</div>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+function renderCCBoard(cc){
+  const ccCode=cc.code;const collapsed=STATE.supCCCollapsed[ccCode]!==false;
+  const doneOpen=STATE.supCCDoneOpen[ccCode];const defects=getDefectsForCC(ccCode);
+  let openCnt=0;let doneTasks=[];
+  cc.items.forEach(item=>{
+    const tasks=STATE.supCCTasks[ccCode]&&STATE.supCCTasks[ccCode][item.code]||[];
+    openCnt+=tasks.filter(t=>!t.done).length;doneTasks=[...doneTasks,...tasks.filter(t=>t.done)];
+  });
+  openCnt+=defects.length;
+  const jst=STATE.ccJobStatus[cc.id]||'not_used';const isDeac=(jst==='deactivated'||jst==='not_used');
+  return`<div class="sup-board${isDeac?' deac':''}" id="ccb-${ccCode}">
+    <div class="sup-board-hdr" onclick="toggleCCBoard('${ccCode}')">
+      <span class="acc-num">${ccCode}</span>
+      <span class="sup-board-name" style="flex:1;font-size:12px;font-weight:500">${cc.name}</span>
+      ${defects.length>0?`<span class="badge bd">${defects.length} defect${defects.length>1?'s':''}</span>`:''}
+      <span class="sup-board-meta">${openCnt} open${doneTasks.length>0?' · '+doneTasks.length+' done':''}</span>
+      <select class="cc-sel" style="font-size:10px;padding:1px 4px" onclick="event.stopPropagation()" onchange="updCCJobStatusSup(${cc.id},this.value)">
+        ${CC_JOB_OPTS.map(o=>`<option value="${o}"${jst===o?' selected':''}>${CC_JOB_LBL[o]}</option>`).join('')}
+      </select>
+      <span class="sup-board-chev${!collapsed?' open':''}">▼</span>
+    </div>
+    <div class="sup-board-body${!collapsed?' open':''}">
+      ${defects.length>0?`<div class="defects-section">
+        <div class="defects-section-title">⚠ Defects requiring attention</div>
+        ${defects.map(d=>`<div class="task-card defect-card"><div class="task-card-main" onclick="setTab('defects');renderContent()">
+          <span class="task-card-text"><span class="badge bd" style="font-size:9px;margin-right:4px">DEFECT</span><b>${d.desc}</b> — ${d.location||''}</span>
+          ${d.due?`<span class="task-due-tag${isOverdue(d.due)?' overdue':''}">${d.due}</span>`:''}
+        </div></div>`).join('')}
+      </div>`:''}
+      ${cc.items.map(item=>{
+        const active=STATE.supCCSubActive[ccCode]&&STATE.supCCSubActive[ccCode][item.code];
+        const subOpen=STATE.supCCSubOpen[ccCode]&&STATE.supCCSubOpen[ccCode][item.code]!==false;
+        const tasks=STATE.supCCTasks[ccCode]&&STATE.supCCTasks[ccCode][item.code]||[];
+        const activeTasks=tasks.filter(t=>!t.done);
+        return`<div class="sup-sub">
+          <div class="sup-sub-hdr${!active?' inactive':''}" onclick="toggleSubOpen('${ccCode}','${item.code}')">
+            <button class="sup-sub-toggle${active?' on':''}" onclick="event.stopPropagation();toggleSubActive('${ccCode}','${item.code}')">${active?'✓':''}</button>
+            <span style="color:var(--t2);font-size:10px;min-width:42px">${item.code}</span>
+            <span style="flex:1">${item.name}</span>
+            ${activeTasks.length>0?`<span class="badge ba" style="font-size:9px">${activeTasks.length}</span>`:''}
+            <span class="sup-sub-chev${subOpen?' open':''}">▶</span>
+          </div>
+          ${active&&subOpen?`<div class="sup-sub-body open">
+            ${activeTasks.map(t=>renderTaskCard(t,ccCode,item.code,true)).join('')}
+            ${renderAddForm(ccCode,item.code,true)}
+          </div>`:''}
+        </div>`;
+      }).join('')}
+      ${doneTasks.length>0?`<div class="done-section">
+        <div class="done-section-hdr" onclick="toggleCCDone('${ccCode}')"><span>Completed (${doneTasks.length})</span><span>${doneOpen?'▲':'▶'}</span></div>
+        <div class="done-section-body${doneOpen?' open':''}">${doneTasks.map(t=>renderTaskCard(t,ccCode,t._subCode||'',true)).join('')}</div>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+function renderSupervisor(){
+  const totOpen=STATE.supPersonBoards.reduce((s,b)=>s+b.tasks.filter(t=>!t.done).length,0)
+    +Object.values(STATE.supCCTasks).reduce((s,subs)=>s+Object.values(subs).reduce((s2,tasks)=>s2+tasks.filter(t=>!t.done).length,0),0);
+  return`<div class="sec-hdr">
+    <div><div class="sec-title">Supervisor Tasks <span style="font-size:13px;font-weight:400;color:var(--t2)">${totOpen} open</span></div>
+    <div class="sec-note">Team boards (left) and CC boards (right). Click header to expand. ✓ toggle activates CC sub-codes.</div></div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-sm" onclick="collapseAllBoards()">Collapse All</button>
+      <button class="btn btn-sm btn-p" onclick="addPersonBoard()">+ Add Board</button>
+    </div>
+  </div>
+  <div class="sup-outer">
+    <div><div class="sup-section">
+      <div class="sup-section-hdr"><span class="sup-section-title">Supervisor Team</span><button class="btn btn-xs" onclick="collapseSection('person')">Collapse All</button></div>
+      ${STATE.supPersonBoards.map((b,i)=>renderPersonBoard(b,i)).join('')}
+    </div></div>
+    <div><div class="sup-section">
+      <div class="sup-section-hdr"><span class="sup-section-title">Cost Centres 01–20</span><button class="btn btn-xs" onclick="collapseSection('cc')">Collapse All</button></div>
+      ${CC_DATA.map(cc=>renderCCBoard(cc)).join('')}
+    </div></div>
+  </div>`;
+}
+function renderSupervisorInPlace(){$('tab-content').innerHTML=renderSupervisor();}
+function togglePersonBoard(bi){STATE.supPersonBoards[bi].collapsed=!STATE.supPersonBoards[bi].collapsed;renderSupervisorInPlace();saveState();}
+function togglePersonDone(bi){STATE.supPersonBoards[bi].doneOpen=!STATE.supPersonBoards[bi].doneOpen;renderSupervisorInPlace();}
+function toggleCCBoard(ccCode){STATE.supCCCollapsed[ccCode]=!STATE.supCCCollapsed[ccCode];renderSupervisorInPlace();saveState();}
+function toggleCCDone(ccCode){STATE.supCCDoneOpen[ccCode]=!STATE.supCCDoneOpen[ccCode];renderSupervisorInPlace();}
+function toggleSubOpen(ccCode,subCode){if(!STATE.supCCSubOpen[ccCode])STATE.supCCSubOpen[ccCode]={};STATE.supCCSubOpen[ccCode][subCode]=!STATE.supCCSubOpen[ccCode][subCode];renderSupervisorInPlace();}
+function toggleSubActive(ccCode,subCode){if(!STATE.supCCSubActive[ccCode])STATE.supCCSubActive[ccCode]={};STATE.supCCSubActive[ccCode][subCode]=!STATE.supCCSubActive[ccCode][subCode];renderSupervisorInPlace();saveState();}
+function collapseAllBoards(){STATE.supPersonBoards.forEach(b=>b.collapsed=true);CC_DATA.forEach(c=>STATE.supCCCollapsed[c.code]=true);renderSupervisorInPlace();}
+function collapseSection(type){if(type==='person')STATE.supPersonBoards.forEach(b=>b.collapsed=true);else CC_DATA.forEach(c=>STATE.supCCCollapsed[c.code]=true);renderSupervisorInPlace();}
+function toggleTaskExpand(id){if(STATE.supExpandedTasks.has(id))STATE.supExpandedTasks.delete(id);else STATE.supExpandedTasks.add(id);renderSupervisorInPlace();}
+function openAddForm(boardKey,subCode,isCC){STATE.supActiveForm={boardKey,subCode:subCode||null,isCC};renderSupervisorInPlace();setTimeout(()=>{const el=$('af-text');if(el)el.focus();},50);}
+function saveTask(boardKey,subCode,isCC){
+  const text=$('af-text')?.value.trim();if(!text){showToast('Enter a task description.');return;}
+  const task={id:STATE.supTaskNextId++,text,who:$('af-who')?.value.trim()||'',dueDate:$('af-due')?.value||'',priority:$('af-pri')?.value||'',notes:$('af-notes')?.value.trim()||'',done:false};
+  if(isCC){
+    if(!STATE.supCCTasks[boardKey])STATE.supCCTasks[boardKey]={};
+    if(!STATE.supCCTasks[boardKey][subCode])STATE.supCCTasks[boardKey][subCode]=[];
+    task._subCode=subCode;STATE.supCCTasks[boardKey][subCode].push(task);
+    if(!STATE.supCCSubActive[boardKey])STATE.supCCSubActive[boardKey]={};
+    STATE.supCCSubActive[boardKey][subCode]=true;
+  }else{const board=STATE.supPersonBoards.find(b=>b.key===boardKey);if(board)board.tasks.push(task);}
+  STATE.supActiveForm=null;renderSupervisorInPlace();saveState();
+}
+function checkTask(boardKey,subCode,taskId,isCC){
+  if(isCC){const tasks=STATE.supCCTasks[boardKey]&&STATE.supCCTasks[boardKey][subCode];if(!tasks)return;const t=tasks.find(t=>t.id===taskId);if(t)t.done=!t.done;}
+  else{const board=STATE.supPersonBoards.find(b=>b.key===boardKey);if(!board)return;const t=board.tasks.find(t=>t.id===taskId);if(t)t.done=!t.done;}
+  renderSupervisorInPlace();saveState();
+}
+function delTask(boardKey,subCode,taskId,isCC){
+  if(!confirm('Delete this task?'))return;
+  if(isCC){const tasks=STATE.supCCTasks[boardKey]&&STATE.supCCTasks[boardKey][subCode];if(tasks){const idx=tasks.findIndex(t=>t.id===taskId);if(idx>-1)tasks.splice(idx,1);}}
+  else{const board=STATE.supPersonBoards.find(b=>b.key===boardKey);if(board){const idx=board.tasks.findIndex(t=>t.id===taskId);if(idx>-1)board.tasks.splice(idx,1);}}
+  renderSupervisorInPlace();saveState();
+}
+function addPersonBoard(){const name=prompt('New board name:');if(!name)return;const key='pb'+Date.now();STATE.supPersonBoards.push({key,name,color:'bns',tasks:[],collapsed:false,doneOpen:false});renderSupervisorInPlace();saveState();}
+function updCCJobStatusSup(id,val){STATE.ccJobStatus[id]=val;renderSupervisorInPlace();saveState();}
+
+// ═══ DEFECTS ═══════════════════════════════════════════════════════
+function renderDefects(){
+  const openDef=STATE.defects.filter(d=>d.status!=='complete');
+  return`<div class="sec-hdr"><div><div class="sec-title">Defect Tracker</div>
+  <div class="sec-note">${STATE.defects.length} logged · ${openDef.length} open — defects auto-appear in Supervisor Tasks under their CC</div></div></div>
+  <div class="card"><div class="card-title">Log New Defect</div>
+    <div class="fr fr2"><div class="fg"><label>Description</label><input type="text" id="d-desc" placeholder="Describe the defect"></div>
+    <div class="fg"><label>Location</label><input type="text" id="d-loc" placeholder="e.g. Master Bedroom, Level 2"></div></div>
+    <div class="fr fr3">
+      <div class="fg"><label>Cost Centre</label><select id="d-cc"><option value="">— CC —</option>${CC_DATA.map(c=>`<option value="${c.code}">${c.code} ${c.name}</option>`).join('')}</select></div>
+      <div class="fg"><label>Trade Responsible</label><input type="text" id="d-trade" placeholder="e.g. Tim Rhodes"></div>
+      <div class="fg"><label>Priority</label><select id="d-pri"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
+    </div>
+    <div class="fr fr2"><div class="fg"><label>Date Raised</label><input type="date" id="d-date" value="${new Date().toISOString().split('T')[0]}"></div>
+    <div class="fg"><label>Due Date</label><input type="date" id="d-due"></div></div>
+    <div class="fg"><label>Notes</label><textarea id="d-notes" rows="2"></textarea></div>
+    <div class="f-actions"><button class="btn btn-p" onclick="addDefect()">Log Defect</button></div>
+  </div>
+  ${STATE.defects.length===0?`<div style="text-align:center;padding:30px;color:var(--t2)">✓ No defects logged.</div>`:`
+  <div class="tbl-wrap"><table>
+    <tr><th>#</th><th>Description</th><th>Location</th><th>CC</th><th>Trade</th><th>Priority</th><th>Raised</th><th>Due</th><th>Status</th><th></th></tr>
+    ${STATE.defects.map((d,i)=>`<tr>
+      <td style="font-size:11px;color:var(--t2)">${d.id}</td><td style="font-size:12px">${d.desc}</td>
+      <td style="font-size:11px">${d.location}</td><td style="font-size:11px;color:var(--blu)">${d.cc}</td>
+      <td style="font-size:11px">${d.trade}</td>
+      <td><span class="badge ${d.priority==='high'?'bd':d.priority==='medium'?'bh':'bns'}">${d.priority}</span></td>
+      <td style="font-size:11px">${d.date}</td>
+      <td style="font-size:11px;${isOverdue(d.due)&&d.status!=='complete'?'color:var(--red);font-weight:500':''}">${d.due||'—'}</td>
+      <td><select style="font-size:11px;padding:2px 4px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg0)" onchange="updD(${i},this.value)">
+        <option value="open"${d.status==='open'?' selected':''}>Open</option>
+        <option value="active"${d.status==='active'?' selected':''}>In Progress</option>
+        <option value="complete"${d.status==='complete'?' selected':''}>Rectified</option>
+        <option value="hold"${d.status==='hold'?' selected':''}>On Hold</option>
+      </select></td>
+      <td><button class="btn btn-xs btn-d" onclick="delD(${i})">×</button></td>
+    </tr>`).join('')}
+  </table></div>`}`;
+}
+function addDefect(){
+  const desc=$('d-desc').value.trim();if(!desc){showToast('Enter a description.');return;}
+  STATE.defects.push({id:STATE.defectId++,desc,location:$('d-loc').value||'—',cc:$('d-cc').value||'—',trade:$('d-trade').value||'—',priority:$('d-pri').value,date:$('d-date').value,due:$('d-due').value,notes:$('d-notes').value,status:'open'});
+  $('tab-content').innerHTML=renderDefects();saveState();renderNav();
+}
+function updD(i,v){STATE.defects[i].status=v;$('tab-content').innerHTML=renderDefects();saveState();renderNav();}
+function delD(i){if(!confirm('Delete this defect?'))return;STATE.defects.splice(i,1);$('tab-content').innerHTML=renderDefects();saveState();renderNav();}
+
+// ═══ VARIATIONS (new) ══════════════════════════════════════════════
+function renderVariations(){
+  const approved=STATE.variations.filter(v=>v.status==='approved');
+  const pending=STATE.variations.filter(v=>v.status==='pending');
+  const approvedTotal=approved.reduce((s,v)=>s+(parseFloat(v.cost)||0),0);
+  const pendingTotal=pending.reduce((s,v)=>s+(parseFloat(v.cost)||0),0);
+  const VAR_STATUS={pending:'Pending',approved:'Approved',rejected:'Rejected',on_hold:'On Hold'};
+  const VAR_STATUS_CLS={pending:'bh',approved:'bc',rejected:'bd',on_hold:'bns'};
+  return`<div class="sec-hdr">
+    <div><div class="sec-title">Variation Log</div>
+    <div class="sec-note">Track cost variations against the contract. ${STATE.variations.length} logged · ${pending.length} pending approval.</div></div>
+    <button class="btn btn-sm" onclick="exportVariations()">Export CSV</button>
+  </div>
+  <div class="metric-grid">
+    <div class="metric"><div class="metric-label">Total Variations</div><div class="metric-val">${STATE.variations.length}</div></div>
+    <div class="metric"><div class="metric-label">Pending</div><div class="metric-val" style="${pending.length>0?'color:var(--amb)':''}">${pending.length}</div><div class="metric-sub">${pendingTotal>0?fmtMs(pendingTotal):''}</div></div>
+    <div class="metric"><div class="metric-label">Approved Cost</div><div class="metric-val" style="color:var(--grn)">${fmtMs(approvedTotal)}</div></div>
+    <div class="metric"><div class="metric-label">Total Exposure</div><div class="metric-val">${fmtMs(approvedTotal+pendingTotal)}</div></div>
+  </div>
+  <div class="card"><div class="card-title">Log New Variation</div>
+    <div class="fr fr2">
+      <div class="fg"><label>Description</label><input type="text" id="v-desc" placeholder="e.g. Additional excavation for storm drain"></div>
+      <div class="fg"><label>Requested by</label><input type="text" id="v-req" placeholder="e.g. Alan Frost / Claus T"></div>
+    </div>
+    <div class="fr fr3">
+      <div class="fg"><label>Cost Centre</label><select id="v-cc"><option value="">— CC —</option>${CC_DATA.map(c=>`<option value="${c.code}">${c.code} ${c.name}</option>`).join('')}</select></div>
+      <div class="fg"><label>Trade / Contractor</label><input type="text" id="v-trade" placeholder="e.g. K&T Earthmoving"></div>
+      <div class="fg"><label>Variation Cost ($)</label><input type="number" id="v-cost" placeholder="0" min="0" step="any"></div>
+    </div>
+    <div class="fr fr3">
+      <div class="fg"><label>Date</label><input type="date" id="v-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fg"><label>Status</label><select id="v-status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="on_hold">On Hold</option></select></div>
+      <div class="fg"><label>Reason / Category</label><input type="text" id="v-reason" placeholder="e.g. Client instruction, Latent condition"></div>
+    </div>
+    <div class="fg"><label>Notes</label><textarea id="v-notes" rows="2" placeholder="Additional details, reference drawings, etc."></textarea></div>
+    <div class="f-actions"><button class="btn btn-p" onclick="addVariation()">Log Variation</button></div>
+  </div>
+  ${STATE.variations.length===0?`<div style="text-align:center;padding:30px;color:var(--t2)">No variations logged.</div>`:`
+  <div class="tbl-wrap"><table>
+    <tr><th>#</th><th>Description</th><th>Requested By</th><th>CC</th><th>Trade</th><th>Reason</th><th class="num">Cost</th><th>Date</th><th>Status</th><th></th></tr>
+    ${STATE.variations.map((v,i)=>`<tr>
+      <td style="font-size:11px;color:var(--t2)">${v.id}</td>
+      <td style="font-size:12px">${v.desc}</td>
+      <td style="font-size:11px">${v.requestedBy||'—'}</td>
+      <td style="font-size:11px;color:var(--blu)">${v.cc||'—'}</td>
+      <td style="font-size:11px">${v.trade||'—'}</td>
+      <td style="font-size:11px;color:var(--t2)">${v.reason||'—'}</td>
+      <td class="num" style="font-size:12px;font-weight:500">${fmtM(parseFloat(v.cost)||0)}</td>
+      <td style="font-size:11px">${v.date||'—'}</td>
+      <td><select style="font-size:11px;padding:2px 4px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg0)" onchange="updV(${i},this.value)">
+        ${Object.entries(VAR_STATUS).map(([k,l])=>`<option value="${k}"${v.status===k?' selected':''}>${l}</option>`).join('')}
+      </select></td>
+      <td><button class="btn btn-xs btn-d" onclick="delV(${i})">×</button></td>
+    </tr>`).join('')}
+    <tr class="total-row"><td colspan="6">TOTAL</td>
+      <td class="num">${fmtM(STATE.variations.reduce((s,v)=>s+(parseFloat(v.cost)||0),0))}</td>
+      <td colspan="3"></td></tr>
+  </table></div>`}`;
+}
+function addVariation(){
+  const desc=$('v-desc').value.trim();if(!desc){showToast('Enter a description.');return;}
+  STATE.variations.push({id:STATE.variationId++,desc,requestedBy:$('v-req').value||'—',cc:$('v-cc').value||'—',trade:$('v-trade').value||'—',cost:$('v-cost').value||0,date:$('v-date').value,status:$('v-status').value,reason:$('v-reason').value||'',notes:$('v-notes').value||''});
+  $('tab-content').innerHTML=renderVariations();saveState();renderNav();
+}
+function updV(i,v){STATE.variations[i].status=v;$('tab-content').innerHTML=renderVariations();saveState();renderNav();}
+function delV(i){if(!confirm('Delete this variation?'))return;STATE.variations.splice(i,1);$('tab-content').innerHTML=renderVariations();saveState();renderNav();}
+function exportVariations(){
+  let csv='#,Description,Requested By,CC,Trade,Reason,Cost,Date,Status,Notes\n';
+  STATE.variations.forEach(v=>csv+=`${v.id},"${v.desc}","${v.requestedBy||''}","${v.cc||''}","${v.trade||''}","${v.reason||''}",${v.cost||0},"${v.date||''}","${v.status}","${(v.notes||'').replace(/"/g,"'")}"\n`);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='44Billiau_Variations.csv';a.click();
+}
+
+// ═══ ORDERS ════════════════════════════════════════════════════════
+function renderOrders(){
+  const delivered=STATE.orders.filter(o=>o.status==='complete').length;
+  return`<div class="sec-hdr"><div><div class="sec-title">Material Orders</div>
+  <div class="sec-note">${STATE.orders.length} orders · ${delivered} delivered</div></div></div>
+  <div class="card"><div class="card-title">New Order</div>
+    <div class="fr fr2">
+      <div class="fg"><label>Item / Material</label><input type="text" id="o-item" placeholder="e.g. Adbri 200 Series Blocks"></div>
+      <div class="fg"><label>Supplier</label><input type="text" id="o-sup" placeholder="Supplier name"></div>
+    </div>
+    <div class="fr fr3">
+      <div class="fg"><label>Quantity</label><input type="number" id="o-qty" placeholder="0"></div>
+      <div class="fg"><label>Unit</label><input type="text" id="o-unit" placeholder="m², Each, m³"></div>
+      <div class="fg"><label>Est. Cost (AUD)</label><input type="number" id="o-cost" placeholder="0"></div>
+    </div>
+    <div class="fr fr3">
+      <div class="fg"><label>Cost Centre</label><select id="o-cc"><option value="">— CC —</option>${CC_DATA.map(c=>`<option value="${c.code}">${c.code} ${c.name}</option>`).join('')}</select></div>
+      <div class="fg"><label>Order Date</label><input type="date" id="o-date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fg"><label>Required On Site By</label><input type="date" id="o-req"></div>
+    </div>
+    <div class="fg"><label>Notes / PO</label><input type="text" id="o-notes" placeholder="PO number, delivery address..."></div>
+    <div class="f-actions"><button class="btn btn-p" onclick="addOrder()">Add Order</button></div>
+  </div>
+  ${STATE.orders.length===0?`<div style="text-align:center;padding:30px;color:var(--t2)">📦 No orders logged.</div>`:`
+  <div class="tbl-wrap"><table>
+    <tr><th>#</th><th>Item</th><th>Supplier</th><th>CC</th><th class="num">Qty</th><th class="num">Cost</th><th>Order Date</th><th>Required By</th><th>Status</th><th></th></tr>
+    ${STATE.orders.map((o,i)=>`<tr>
+      <td style="font-size:11px;color:var(--t2)">${o.id}</td>
+      <td style="font-size:12px">${o.item}</td>
+      <td style="font-size:11px">${o.supplier}</td>
+      <td style="font-size:11px;color:var(--blu)">${o.cc}</td>
+      <td class="num" style="font-size:11px">${o.qty} ${o.unit}</td>
+      <td class="num" style="font-size:11px">${fmtM(parseFloat(o.cost)||0)}</td>
+      <td style="font-size:11px">${o.date}</td>
+      <td style="font-size:11px;${isOverdue(o.required)&&o.status!=='complete'?'color:var(--red);font-weight:500':''}">${o.required||'—'}</td>
+      <td><select style="font-size:11px;padding:2px 4px;border:0.5px solid var(--b2);border-radius:5px;background:var(--bg0)" onchange="updO(${i},this.value)">
+        <option value="not_started"${o.status==='not_started'?' selected':''}>Not Ordered</option>
+        <option value="active"${o.status==='active'?' selected':''}>Ordered</option>
+        <option value="hold"${o.status==='hold'?' selected':''}>In Transit</option>
+        <option value="complete"${o.status==='complete'?' selected':''}>Delivered</option>
+      </select></td>
+      <td><button class="btn btn-xs btn-d" onclick="delO(${i})">×</button></td>
+    </tr>`).join('')}
+  </table></div>`}`;
+}
+function addOrder(){const item=$('o-item').value.trim();if(!item){showToast('Enter an item.');return;}STATE.orders.push({id:STATE.orderId++,item,supplier:$('o-sup').value||'—',qty:$('o-qty').value||0,unit:$('o-unit').value||'Each',cost:$('o-cost').value||0,cc:$('o-cc').value||'—',date:$('o-date').value,required:$('o-req').value,notes:$('o-notes').value,status:'not_started'});$('tab-content').innerHTML=renderOrders();saveState();}
+function updO(i,v){STATE.orders[i].status=v;$('tab-content').innerHTML=renderOrders();saveState();}
+function delO(i){if(!confirm('Delete this order?'))return;STATE.orders.splice(i,1);$('tab-content').innerHTML=renderOrders();saveState();}
+
+// ═══ DIRECTORY ═════════════════════════════════════════════════════
+function renderDirectory(){
+  const search=STATE.dirSearch.toLowerCase();
+  const grouped={PM:[]};
+  CC_DATA.forEach(c=>grouped[c.code]=[]);
+  CTRAW.forEach(c=>{const cc=c[1];if(grouped[cc]!==undefined)grouped[cc].push(c);});
+  const filterC=list=>search?list.filter(c=>c.join(' ').toLowerCase().includes(search)):list;
+  let html=`<div class="sec-hdr">
+    <div><div class="sec-title">Trade Directory</div>
+    <div class="sec-note">✓ select contacts for this job. Set CC job status here or in BOQ.</div></div>
+    <button class="btn btn-sm btn-p" onclick="addDirContact()">+ Add Contact</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <input type="text" id="dir-s" placeholder="Search contacts, companies, trades..." value="${STATE.dirSearch}" oninput="STATE.dirSearch=this.value;$('tab-content').innerHTML=renderDirectory()" style="flex:1;padding:6px 9px;border:0.5px solid var(--b2);border-radius:var(--r8);font-size:12px;background:var(--bg0)">
+    <button class="btn btn-sm" onclick="STATE.dirSearch='';$('tab-content').innerHTML=renderDirectory()">Clear</button>
+  </div>`;
+  const renderGroup=(key,title,list,ccId)=>{
+    const fl=filterC(list);if(!fl.length&&search)return'';
+    const open=STATE.dirOpenCC[key];
+    const sel=fl.filter(c=>STATE.contacts[c[0]]&&STATE.contacts[c[0]].selected).length;
+    const jst=ccId?STATE.ccJobStatus[ccId]||'not_used':null;
+    return`<div class="dir-cc-group">
+      <div class="dir-cc-hdr" onclick="STATE.dirOpenCC['${key}']=!STATE.dirOpenCC['${key}'];$('tab-content').innerHTML=renderDirectory()">
+        <span class="acc-num">${key}</span>
+        <span style="font-size:13px;font-weight:500;flex:1">${title}</span>
+        ${sel>0?`<span class="badge bc">${sel} selected</span>`:''}
+        ${jst?`<select class="cc-sel" onclick="event.stopPropagation()" onchange="STATE.ccJobStatus[${ccId}]=this.value;$('tab-content').innerHTML=renderDirectory();saveState()">
+          ${CC_JOB_OPTS.map(o=>`<option value="${o}"${jst===o?' selected':''}>${CC_JOB_LBL[o]}</option>`).join('')}
+        </select>`:''}
+        <span class="acc-chev${open?' open':''}">▼</span>
+      </div>
+      <div class="dir-body${open?' open':''}">
+        ${fl.length===0?`<p style="font-size:12px;color:var(--t2);padding:6px 0">No contacts in this category.</p>`:fl.map(c=>{
+          const sel2=STATE.contacts[c[0]]&&STATE.contacts[c[0]].selected;
+          return`<div class="dir-row">
+            <button class="dir-sel${sel2?' on':''}" onclick="STATE.contacts[${c[0]}]={selected:${!sel2}};$('tab-content').innerHTML=renderDirectory();saveState()">${sel2?'✓':''}</button>
+            <span style="font-size:12px;font-weight:500;min-width:130px">${c[5]||c[4]}</span>
+            <span style="font-size:11px;color:var(--t1);min-width:140px">${c[4]}</span>
+            <span style="font-size:10px;color:var(--tel);min-width:90px">${c[2]}</span>
+            <span style="font-size:11px;color:var(--t1);min-width:100px">${c[3]}</span>
+            <span style="font-size:11px;color:var(--blu);min-width:110px">${c[6]}</span>
+            <span style="font-size:10px;color:var(--t2)">${c[7]}</span>
+          </div>`;
+        }).join('')}
+        <div style="padding:5px 0"><button class="btn btn-xs" onclick="addDirContact('${key}')">+ Add to ${key}</button></div>
+      </div>
+    </div>`;
+  };
+  html+=renderGroup('PM','Project Management',grouped['PM']||[]);
+  CC_DATA.forEach(cc=>{html+=renderGroup(cc.code,`CC ${cc.code} — ${cc.name}`,grouped[cc.code]||[],cc.id);});
+  return html;
+}
+function addDirContact(defaultCC=''){
+  const cc=prompt('Cost Centre (e.g. 06 or PM):',defaultCC);if(!cc)return;
+  const sub=prompt('Sub-code (e.g. 06.70):',cc)||'';
+  const type=prompt('Trade type:');if(!type)return;
+  const company=prompt('Company:');if(!company)return;
+  const contact=prompt('Contact name:')||'';
+  const phone=prompt('Phone:')||'';
+  const email=prompt('Email:')||'';
+  const id=Math.max(...CTRAW.map(c=>c[0]))+1;
+  CTRAW.push([id,cc.trim().toUpperCase(),sub,type,company,contact,phone,email]);
+  STATE.contacts[id]={selected:false};
+  $('tab-content').innerHTML=renderDirectory();saveState();
+}
+
+// ═══ RENDER + INIT ══════════════════════════════════════════════════
+function renderContent(){
+  const r={dashboard:renderDashboard,gantt:renderGantt,boq:renderBOQ,supervisor:renderSupervisor,defects:renderDefects,variations:renderVariations,orders:renderOrders,directory:renderDirectory};
+  $('tab-content').innerHTML=(r[STATE.tab]||renderDashboard)();
+  if(STATE.tab==='gantt')initGanttDrag();
+}
+
+// Init
+loadState();
+renderNav();
+renderContent();
+</script>
+</body>
+</html>
